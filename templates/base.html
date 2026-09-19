@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}🍄 Mario: The Cyber Heist | OJAS Tech Fest{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game3d.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/challenge.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Retro Scanlines Effect -->
+    <div class="scanlines"></div>
+
+    <!-- Universal Top HUD -->
+    <header class="top-hud">
+        <div class="hud-left">
+            <a href="{{ url_for('game.index', home=1) }}" class="hud-logo" title="Return to Title Island">
+                <span class="red">🍄 MARIO</span>
+                <span class="gold">CYBER HEIST</span>
+            </a>
+            <nav class="hud-nav">
+                <a href="{{ url_for('game.index', home=1) }}" class="nav-link {% if request.path == '/' %}active{% endif %}" title="Title Island & Coin Harvest">HOME</a>
+                {% if resume_info and resume_info.is_started and not resume_info.is_finished %}
+                <a href="{{ resume_info.resume_url }}" class="nav-link" style="color: #00ff88; border-color: rgba(0, 255, 136, 0.5); background: rgba(0, 255, 136, 0.15); font-weight: bold; text-shadow: 0 0 10px rgba(0,255,136,0.6);" title="Jump directly to where you stopped!">
+                    🚀 RESUME CASE {{ resume_info.challenge_id }}
+                </a>
+                {% endif %}
+                <a href="{{ url_for('game.briefing') }}" class="nav-link {% if request.path == '/briefing' %}active{% endif %}">BRIEFING</a>
+                <a href="{{ url_for('game.world_map') }}" class="nav-link {% if request.path == '/map' %}active{% endif %}">3D MAP</a>
+                <a href="{{ url_for('game.leaderboard') }}" class="nav-link {% if request.path == '/leaderboard' %}active{% endif %}">LEADERBOARD</a>
+                {% if session.get('is_admin') %}
+                <a href="{{ url_for('admin.admin_panel') }}" class="nav-link {% if request.path.startswith('/admin') %}active{% endif %}" style="color: var(--mario-red); font-weight: bold; border-color: rgba(255, 42, 77, 0.4); background: rgba(255, 42, 77, 0.1);">⚙️ ADMIN</a>
+                {% else %}
+                <a href="{{ url_for('admin.admin_panel') }}" class="nav-link {% if request.path.startswith('/admin') %}active{% endif %}" style="color: #8da4d0; border-color: rgba(255, 255, 255, 0.15);" title="Organizer Access (Master Key Required)">🔐 ADMIN</a>
+                {% endif %}
+            </nav>
+        </div>
+
+        <div class="hud-stats">
+            <div class="stat-pill team" title="Investigator Identity">
+                🕵️ <span id="hud-team-val">{{ team.team_name if team else 'Inspector Mario' }}</span>
+            </div>
+            <div class="stat-pill score" title="Forensic Points">
+                🏆 <span id="hud-score-val">{{ team.score if team else 0 }}</span> PTS
+            </div>
+            <div class="stat-pill coins" title="Cyber Coins (Click 3D ? Blocks to earn)">
+                🪙 <span id="hud-coins-val">{{ team.coins if team else 100 }}</span>
+            </div>
+            <div class="stat-pill stars" title="Golden Stars Recovered">
+                ⭐ <span id="hud-stars-val">{{ team.stars if team else 0 }}</span> / 12
+            </div>
+            <div class="stat-pill timer" id="hud-timer-pill" data-started-at="{{ team.started_at if team and team.started_at else '' }}" data-finished-at="{{ team.finished_at if team and team.finished_at else '' }}" data-total-time="{{ team.total_time if team and team.total_time else '' }}" title="Mission Clock • Click to toggle between elapsed timer and local clock">
+                ⏱️ <span id="hud-timer-val">00:00:00</span>
+            </div>
+            <button id="sound-toggle-btn" class="audio-btn" title="Toggle 8-bit Audio">🔊</button>
+        </div>
+    </header>
+
+    <!-- Main Content Mount -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Offline Footer -->
+    <footer style="padding: 16px 28px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.8rem; color: #5a729c; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 30px;">
+        <div>
+            ⚡ <strong>CHANAKYA UNIVERSITY • OJAS TECH FEST 2026</strong> // MARIO: THE CYBER HEIST
+        </div>
+        <div style="display: flex; gap: 16px; align-items: center;">
+            <a href="{{ url_for('game.briefing') }}" style="color: #8da4d0; text-decoration: none;">Squad Dispatch</a>
+            <span>•</span>
+            <a href="{{ url_for('game.leaderboard') }}" style="color: #8da4d0; text-decoration: none;">Live Standings</a>
+            <span>•</span>
+            <a href="{{ url_for('admin.admin_panel') }}" style="color: var(--mario-red); text-decoration: none; font-weight: bold;">🔐 Organizer Terminal (/admin)</a>
+        </div>
+    </footer>
+
+    <!-- Scripts: Offline Bundled Three.js & Custom Audio Engine -->
+    <script src="{{ url_for('static', filename='vendor/three.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/audio.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/three-scenes.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/timer.js') }}"></script>
+
+    <script>
+        // Sound toggle button
+        const soundBtn = document.getElementById('sound-toggle-btn');
+        if (soundBtn) {
+            soundBtn.addEventListener('click', () => {
+                if (window.soundFx) {
+                    const isMuted = window.soundFx.toggleMute();
+                    soundBtn.innerText = isMuted ? '🔇' : '🔊';
+                }
+            });
+        }
+
+        // Squad Local Storage Sync
+        {% if team %}
+        try {
+            localStorage.setItem('mario_team_code', '{{ team.access_code }}');
+            localStorage.setItem('mario_team_name', '{{ team.team_name }}');
+            {% if resume_info and resume_info.resume_url %}
+            localStorage.setItem('mario_resume_url', '{{ resume_info.resume_url }}');
+            {% endif %}
+        } catch (e) {}
+        {% endif %}
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

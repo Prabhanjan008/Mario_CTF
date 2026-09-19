@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}🍄 Mario: The Cyber Heist | 3D CTF Adventure{% endblock %}
+
+{% block content %}
+<div class="game-3d-container">
+    <!-- WebGL Canvas for 3D Title Island -->
+    <canvas id="title-canvas" class="webgl-canvas"></canvas>
+
+    <!-- 3D HUD Overlay -->
+    <div class="title-overlay">
+        <div class="title-hero">
+            <div class="title-badge">⚡ CHANAKYA UNIVERSITY • OJAS TECH FEST 2026</div>
+            <h1 class="title-main">MARIO <span style="color: var(--cyber-cyan);">//</span> THE CYBER HEIST</h1>
+            <p class="title-sub">3D CYBERSECURITY FORENSICS & RECON ADVENTURE</p>
+            {% if resume_info and resume_info.is_started %}
+            <div style="margin-top: 14px; display: inline-flex; align-items: center; gap: 10px; background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(0, 255, 136, 0.5); padding: 8px 18px; border-radius: 30px; box-shadow: 0 0 20px rgba(0, 255, 136, 0.25);">
+                <span style="font-size: 0.85rem; color: #00ff88; font-weight: bold; letter-spacing: 1px;">
+                    🕵️ SQUAD: {{ team.team_name if team else 'Inspector Mario' }}
+                </span>
+                <span style="color: rgba(255,255,255,0.4);">•</span>
+                <span style="font-size: 0.85rem; color: #fff;">
+                    CURRENT STATUS: <strong style="color: var(--cyber-cyan);">{{ resume_info.resume_label }}</strong>
+                </span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="title-bottom-bar">
+            <div class="title-interactive-hint">
+                🪙 Click the floating <strong>3D [ ? ] BLOCKS</strong> to bounce them & harvest Cyber Coins!
+            </div>
+
+            <div class="title-actions">
+                {% if resume_info and resume_info.is_started and not resume_info.is_finished %}
+                <a href="{{ resume_info.resume_url }}" class="btn-primary btn-start-heist" style="background: linear-gradient(135deg, #00ff88, #00aa44); box-shadow: 0 0 25px rgba(0, 255, 136, 0.5); text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                    🚀 RESUME MISSION: CASE {{ resume_info.challenge_id }}
+                </a>
+                <button id="btn-play-cinematic" class="btn-secondary" style="border-color: rgba(255, 255, 255, 0.3);">
+                    🎬 REPLAY CINEMATIC
+                </button>
+                {% elif resume_info and resume_info.is_finished %}
+                <a href="{{ url_for('game.victory') }}" class="btn-primary btn-start-heist" style="background: linear-gradient(135deg, var(--cyber-gold), #cc9900); box-shadow: 0 0 25px rgba(255, 204, 0, 0.5); text-decoration: none;">
+                    🏆 VICTORY CEREMONY (COMPLETED)
+                </a>
+                <button id="btn-play-cinematic" class="btn-secondary" style="border-color: rgba(255, 255, 255, 0.3);">
+                    🎬 REPLAY CINEMATIC
+                </button>
+                {% else %}
+                <button id="btn-play-cinematic" class="btn-primary btn-start-heist">
+                    🚨 START MISSION
+                </button>
+                {% endif %}
+                <a href="{{ url_for('game.world_map') }}" class="btn-secondary">
+                    🗺️ WORLD MAP
+                </a>
+                <a href="{{ url_for('game.briefing') }}" class="btn-secondary">
+                    📋 MISSION BRIEFING
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3D Opening Cinematic Cutscene Modal -->
+<div id="cinematic-modal" class="cinematic-modal hidden">
+    <div class="letterbox-bar letterbox-top"></div>
+    <div class="letterbox-bar letterbox-bottom"></div>
+
+    <button id="cinematic-skip" class="cinematic-skip-btn">SKIP CUTSCENE ⏩</button>
+
+    <canvas id="cinematic-canvas" class="webgl-canvas"></canvas>
+
+    <div class="cinematic-hud">
+        <div id="cinematic-subtitle" class="cinematic-subtitle-box">
+            CONNECTING TO MUSHROOM KINGDOM SECURE VAULT TELEMETRY...
+        </div>
+        <div id="cinematic-action-btn" class="hidden" style="pointer-events: auto;">
+            {% if resume_info and resume_info.is_started and not resume_info.is_finished %}
+            <a href="{{ resume_info.resume_url }}" class="btn-primary">
+                🚀 RESUME ACTIVE CASE (CASE {{ resume_info.challenge_id }})
+            </a>
+            {% else %}
+            <a href="{{ url_for('game.briefing') }}" class="btn-primary">
+                🚀 COMMENCE CYBER INVESTIGATION
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/scene-title.js') }}"></script>
+<script src="{{ url_for('static', filename='js/scene-cinematic.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const startBtn = document.getElementById('btn-play-cinematic');
+        const skipBtn = document.getElementById('cinematic-skip');
+
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                if (window.cinematicSceneInstance) {
+                    window.cinematicSceneInstance.start();
+                } else {
+                    window.location.href = '/briefing';
+                }
+            });
+        }
+
+        if (skipBtn) {
+            skipBtn.addEventListener('click', () => {
+                if (window.cinematicSceneInstance) {
+                    window.cinematicSceneInstance.skip();
+                } else {
+                    window.location.href = '/briefing';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

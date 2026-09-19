@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}🏆 Live Leaderboard | Mario: The Cyber Heist{% endblock %}
+
+{% block content %}
+<div class="challenge-page-container" style="max-width: 1100px;">
+    <div class="challenge-topbar">
+        <a href="{{ url_for('game.world_map') }}" class="back-btn">⬅️ RETURN TO 3D MAP</a>
+        <div class="title-badge" style="margin-bottom: 0;">LIVE RANKINGS // OJAS TECH FEST 2026</div>
+    </div>
+
+    <div class="cyber-card">
+        <div class="challenge-meta-header">
+            <div>
+                <h1 class="challenge-title-main">CYBER HEIST INVESTIGATION LEADERBOARD</h1>
+                <p style="color: #8da4d0;">Official standings for the Chanakya University CTF competition.</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button onclick="window.location.reload()" class="btn-secondary" style="padding: 8px 16px;">
+                    🔄 REFRESH STANDINGS
+                </button>
+                {% if session.get('is_admin') %}
+                <button id="leaderboard-reset-btn" class="btn-primary" style="background: linear-gradient(135deg, #aa0000, #550000); padding: 8px 16px; font-size: 0.85rem; border: 1px solid var(--mario-red);" title="Host Only: Reset leaderboard">
+                    ⚠️ RESET LEADERBOARD (HOST ONLY)
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <table class="cyber-table" style="margin-top: 20px;">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">RANK</th>
+                    <th>DETECTIVE SQUAD</th>
+                    <th>FORENSIC POINTS</th>
+                    <th>GOLDEN STARS</th>
+                    <th>CYBER COINS</th>
+                    <th>SECTOR REACHED</th>
+                    <th>TIME TAKEN</th>
+                    <th>LAST SOLVE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in leaderboard %}
+                <tr {% if team and entry.id == team.id %}style="background: rgba(0, 240, 255, 0.1); font-weight: bold;"{% endif %}>
+                    <td>
+                        {% if loop.index == 1 %}
+                            🥇 1ST
+                        {% elif loop.index == 2 %}
+                            🥈 2ND
+                        {% elif loop.index == 3 %}
+                            🥉 3RD
+                        {% else %}
+                            #{{ loop.index }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span style="color: #fff; font-family: var(--font-heading);">{{ entry.team_name }}</span>
+                        {% if team and entry.id == team.id %}
+                            <span class="badge-tag badge-category" style="margin-left: 8px;">YOU</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: var(--cyber-cyan); font-family: var(--font-heading); font-size: 1.05rem;">
+                        {{ entry.score }} PTS
+                    </td>
+                    <td style="color: #ffd700; font-family: var(--font-heading);">
+                        ⭐ {{ entry.stars }} / 12
+                    </td>
+                    <td style="color: var(--cyber-gold); font-family: var(--font-heading);">
+                        🪙 {{ entry.coins }}
+                    </td>
+                    <td>
+                        <span class="badge-tag badge-category">Sector 0{{ entry.current_world }}</span>
+                    </td>
+                    <td>
+                        {% if entry.total_time %}
+                            <span style="color: var(--cyber-gold); font-family: monospace; font-weight: bold;">
+                                🏆 {{ entry.total_time }}
+                            </span>
+                            <span class="badge-tag badge-diff-easy" style="font-size: 0.65rem; margin-left: 4px; padding: 1px 4px;">COMPLETED</span>
+                        {% elif entry.started_at %}
+                            <span style="color: var(--cyber-cyan); font-family: monospace; font-size: 0.85rem;">
+                                ⏱️ IN PROGRESS
+                            </span>
+                        {% else %}
+                            <span style="color: #5a729c; font-family: monospace; font-size: 0.8rem;">
+                                💤 STANDBY
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td style="font-family: monospace; font-size: 0.82rem;">
+                        <span class="live-timestamp" data-timestamp="{{ entry.last_active }}">{{ entry.last_active }}</span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 24px; color: #8da4d0;">
+                        No submissions recorded yet. Be the first to solve a challenge!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if session.get('is_admin') %}
+<script>
+    const resetBtn = document.getElementById('leaderboard-reset-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', async () => {
+            if (!confirm("⚠️ HOST CONFIRMATION: Are you sure you want to completely RESET the leaderboard and all squad scores to 0?")) return;
+            try {
+                const res = await fetch('/api/admin/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (window.resetCtfTimer) window.resetCtfTimer();
+                    sessionStorage.clear();
+                    alert("✅ Success: Leaderboard and all competition scores reset to 0!");
+                    window.location.reload();
+                } else {
+                    alert(data.message || "Failed to reset leaderboard.");
+                }
+            } catch (e) {
+                alert("Network error executing reset.");
+            }
+        });
+    }
+</script>
+{% endif %}
+{% endblock %}

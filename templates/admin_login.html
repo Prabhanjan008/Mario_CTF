@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}🔒 Host Security Terminal | Mario: The Cyber Heist{% endblock %}
+
+{% block content %}
+<div class="challenge-page-container" style="max-width: 520px; margin-top: 60px;">
+    <div class="cyber-card" style="border-color: var(--mario-red); box-shadow: 0 0 35px var(--mario-red-glow); text-align: center; padding: 36px 28px;">
+        <div style="font-size: 3.2rem; margin-bottom: 12px; filter: drop-shadow(0 0 10px rgba(255, 42, 77, 0.6));">
+            👑 🔐 🛡️
+        </div>
+        <h1 style="font-family: var(--font-heading); font-size: 1.35rem; color: #fff; margin-bottom: 6px; letter-spacing: 1px;">
+            RESTRICTED ORGANIZER TERMINAL
+        </h1>
+        <div style="color: var(--mario-red); font-family: monospace; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 18px; font-weight: bold;">
+            // AUTHORIZED EVENT HOSTS & ORGANIZERS ONLY //
+        </div>
+
+        <p style="color: #8da4d0; font-size: 0.85rem; line-height: 1.5; margin-bottom: 22px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px;">
+            Welcome, Host. Authenticate with your designated <strong>Secret Host Key</strong> to access live team tracking, scoring analytics, and event operations.
+        </p>
+
+        {% if error %}
+        <div class="flag-alert-box alert-error" style="margin-bottom: 18px; text-align: left;">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('admin.admin_panel') }}" style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="text-align: left;">
+                <label style="display: block; font-family: var(--font-heading); font-size: 0.78rem; color: #8da4d0; margin-bottom: 6px;">
+                    SECRET HOST PASSKEY:
+                </label>
+                <input type="password" name="admin_key" class="flag-input" placeholder="Enter Host Secret Key (e.g. OJAS-HOST-...)" autofocus required autocomplete="off" style="letter-spacing: 2px; font-family: monospace;">
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%; padding: 14px; font-size: 1rem; letter-spacing: 1px;">
+                ACCESS HOST DASHBOARD 🔓
+            </button>
+        </form>
+
+        <div style="margin-top: 24px; padding: 12px; background: rgba(255, 42, 77, 0.05); border: 1px dashed rgba(255, 42, 77, 0.2); border-radius: 6px; font-size: 0.75rem; color: #a4b3cf; line-height: 1.4;">
+            🔒 <strong>CONFIDENTIALITY PROTOCOL</strong>: Host keys are private to the event directors and are never distributed to players.
+        </div>
+    </div>
+</div>
+{% endblock %}

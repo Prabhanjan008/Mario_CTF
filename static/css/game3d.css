@@ -1,0 +1,301 @@
+/* 3D Canvas Viewport & HUD Overlay Styles */
+
+.game-3d-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.webgl-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 1;
+}
+
+/* Title Screen HUD */
+.title-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 80px 40px 40px 40px;
+}
+
+.title-hero {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.title-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    background: rgba(0, 240, 255, 0.12);
+    border: 1px solid var(--cyber-cyan);
+    color: var(--cyber-cyan);
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    text-shadow: 0 0 10px var(--cyber-cyan-glow);
+}
+
+.title-main {
+    font-family: var(--font-display);
+    font-size: 2.0rem;
+    line-height: 1.35;
+    color: #fff;
+    text-shadow: 
+        0 0 20px rgba(255, 42, 77, 0.5),
+        3px 3px 0 #99001e;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.title-sub {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #a0b5dd;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.title-bottom-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 15px;
+    pointer-events: auto;
+}
+
+.title-interactive-hint {
+    text-align: center;
+    background: rgba(4, 9, 22, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-glow-gold);
+    padding: 8px 22px;
+    border-radius: 20px;
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    color: var(--cyber-gold);
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.15);
+}
+
+.title-actions {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.btn-start-heist {
+    font-size: 1.1rem;
+    padding: 16px 38px;
+    animation: pulseButton 2s infinite ease-in-out;
+}
+
+@keyframes pulseButton {
+    0%, 100% { box-shadow: 0 0 15px var(--mario-red-glow); }
+    50% { box-shadow: 0 0 35px var(--mario-red-glow), 0 0 10px #fff; }
+}
+
+/* 3D Cinematic Cutscene Modal */
+.cinematic-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 5000;
+}
+
+.letterbox-bar {
+    position: absolute;
+    width: 100%;
+    height: 10vh;
+    background: #000;
+    z-index: 5010;
+}
+
+.letterbox-top { top: 0; }
+.letterbox-bottom { bottom: 0; }
+
+.cinematic-hud {
+    position: absolute;
+    bottom: 12vh;
+    left: 0;
+    width: 100%;
+    z-index: 5020;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    pointer-events: none;
+}
+
+.cinematic-subtitle-box {
+    background: rgba(4, 7, 18, 0.85);
+    border: 1px solid var(--border-glow);
+    padding: 14px 28px;
+    border-radius: 8px;
+    max-width: 800px;
+    width: 90%;
+    text-align: center;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: #00f0ff;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+.subtitle-alert {
+    border-color: var(--mario-red) !important;
+    color: var(--mario-red) !important;
+    text-shadow: 0 0 15px var(--mario-red-glow) !important;
+    animation: flashAlert 0.5s infinite alternate;
+}
+
+@keyframes flashAlert {
+    from { background: rgba(255, 42, 77, 0.15); }
+    to { background: rgba(255, 42, 77, 0.45); }
+}
+
+.cinematic-skip-btn {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    z-index: 5030;
+    background: rgba(0, 0, 0, 0.6);
+    color: #8899aa;
+    border: 1px solid #445566;
+    padding: 8px 18px;
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cinematic-skip-btn:hover {
+    color: #fff;
+    border-color: var(--cyber-cyan);
+}
+
+/* 3D World Map HUD */
+.map-hud-overlay {
+    position: absolute;
+    top: 80px;
+    right: 30px;
+    width: 380px;
+    z-index: 50;
+    pointer-events: none;
+}
+
+.sector-card {
+    background: var(--bg-glass);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--border-glow);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+}
+
+.sector-header {
+    margin-bottom: 12px;
+}
+
+.sector-title {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.sector-subtitle {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    color: var(--cyber-cyan);
+    letter-spacing: 1px;
+}
+
+.sector-badge {
+    display: inline-block;
+    margin: 8px 0 14px 0;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.badge-unlocked {
+    background: rgba(0, 255, 102, 0.15);
+    border: 1px solid var(--cyber-green);
+    color: var(--cyber-green);
+}
+
+.badge-locked {
+    background: rgba(255, 42, 77, 0.15);
+    border: 1px solid var(--mario-red);
+    color: var(--mario-red);
+}
+
+.sector-desc {
+    color: #b0c2de;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+}
+
+.map-sector-nav {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    background: var(--bg-glass);
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: 1px solid var(--border-glow);
+    z-index: 50;
+}
+
+.nav-sector-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.nav-sector-btn:hover, .nav-sector-btn.active {
+    background: rgba(0, 240, 255, 0.2);
+    border-color: var(--cyber-cyan);
+    color: var(--cyber-cyan);
+    box-shadow: 0 0 12px var(--cyber-cyan-glow);
+}

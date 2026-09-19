@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}🔒 Sector Encrypted | Mario: The Cyber Heist{% endblock %}
+
+{% block content %}
+<div class="challenge-page-container" style="max-width: 650px; text-align: center; margin-top: 60px;">
+    <div class="cyber-card" style="border-color: var(--mario-red); box-shadow: 0 0 35px var(--mario-red-glow);">
+        <div style="font-size: 4rem; margin-bottom: 12px;">🔒 ⚡ 🔒</div>
+        <h1 style="font-family: var(--font-display); font-size: 1.4rem; color: var(--mario-red); margin-bottom: 12px;">
+            SECTOR ACCESS RESTRICTED!
+        </h1>
+        <p style="color: #c0d4f2; font-size: 1.05rem; margin-bottom: 20px;">
+            This sector island is shielded behind an impenetrable quantum firewall.
+        </p>
+
+        <div style="background: rgba(255, 42, 77, 0.1); border: 1px dashed var(--mario-red); padding: 14px; border-radius: 6px; margin-bottom: 24px;">
+            <span style="font-family: var(--font-heading); color: #fff; font-size: 0.95rem;">
+                REQUIRED: <strong>{{ required }} GOLDEN STARS</strong> ⭐ (Current: {{ team.stars if team else 0 }})
+            </span>
+        </div>
+
+        <p style="font-size: 0.9rem; color: #8da4d0; margin-bottom: 24px;">
+            Solve open investigations in prior unlocked sectors to harvest Golden Stars and crack this sector's firewall!
+        </p>
+
+        <a href="{{ url_for('game.world_map') }}" class="btn-primary">
+            RETURN TO 3D WORLD MAP 🗺️
+        </a>
+    </div>
+</div>
+{% endblock %}

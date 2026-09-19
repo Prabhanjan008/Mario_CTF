@@ -1,0 +1,47 @@
+========================================================================
+🍄 MARIO: THE CYBER HEIST - MASTER GAME & HOST LINKS DIRECTORY
+Chanakya University • OJAS Tech Fest 2026
+========================================================================
+
+--- 1. LOCALHOST LINKS (FOR THIS HOST COMPUTER) ---
+* Game Start:          http://127.0.0.1:5000/
+* Squad Registration:  http://127.0.0.1:5000/briefing
+* 3D World Map:        http://127.0.0.1:5000/map
+* Leaderboard:         http://127.0.0.1:5000/leaderboard
+* Victory Ceremony:    http://127.0.0.1:5000/victory
+* Boss Arena:          http://127.0.0.1:5000/boss
+
+--- 2. WI-FI / LAN LINKS (FOR PARTICIPANTS ON OTHER COMPUTERS) ---
+Share these links with teams connected to the same college Wi-Fi / LAN network:
+* Start Screen:        http://192.168.100.7:5000/
+* Team Registration:   http://192.168.100.7:5000/briefing
+* 3D Map:              http://192.168.100.7:5000/map
+* Live Leaderboard:    http://192.168.100.7:5000/leaderboard
+
+--- 3. HOST / ORGANIZER ACCESS (CONFIDENTIAL) ---
+* Host Admin Terminal: http://127.0.0.1:5000/admin
+* Export CSV Results:  http://127.0.0.1:5000/api/admin/export/csv
+* Export JSON Results: http://127.0.0.1:5000/api/admin/export/json
+
+SECRET HOST PASSKEYS:
+1. Primary Host Key:   OJAS-HOST-ALPHA-7701
+2. Secondary Co-Host:  OJAS-HOST-BRAVO-9924
+3. Emergency Key:      OJAS-HOST-SUPER-4418
+
+--- 4. DIRECT CHALLENGE LINKS ---
+* Case 1 (Web):        http://127.0.0.1:5000/challenge/1
+* Case 2 (Crypto):     http://127.0.0.1:5000/challenge/2
+* Case 3 (Stego):      http://127.0.0.1:5000/challenge/3
+* Case 4 (OSINT):      http://127.0.0.1:5000/challenge/4
+* Case 5 (Network):    http://127.0.0.1:5000/challenge/5
+* Case 6 (Web):        http://127.0.0.1:5000/challenge/6
+* Case 7 (API):        http://127.0.0.1:5000/challenge/7
+* Case 8 (JWT):        http://127.0.0.1:5000/challenge/8
+* Case 9 (Forensics):  http://127.0.0.1:5000/challenge/9
+* Case 10 (SIEM):      http://127.0.0.1:5000/challenge/10
+* Case 11 (SQLi):      http://127.0.0.1:5000/challenge/11
+* Case 12 (Boss):      http://127.0.0.1:5000/challenge/12
+
+--- 5. LOCAL SOLUTION DOCUMENTATION ---
+* Master Answer Key:   HOST_CREDENTIALS_AND_ANSWER_KEY.md
+========================================================================

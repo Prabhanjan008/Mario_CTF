@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}📋 Mission Briefing | Mario: The Cyber Heist{% endblock %}
+
+{% block content %}
+<div class="challenge-page-container" style="max-width: 1000px;">
+    <div class="challenge-topbar">
+        <a href="{{ url_for('game.index', home=1) }}" class="back-btn">⬅️ RETURN TO TITLE</a>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            {% if resume_info and resume_info.is_started and not resume_info.is_finished %}
+            <a href="{{ resume_info.resume_url }}" class="btn-primary" style="background: linear-gradient(135deg, #00ff88, #00aa44); box-shadow: 0 0 16px rgba(0, 255, 136, 0.45); text-decoration: none;">
+                🚀 RESUME ACTIVE CASE (CASE {{ resume_info.challenge_id }})
+            </a>
+            {% endif %}
+            <a href="{{ url_for('game.world_map') }}" class="btn-secondary">ENTER 3D WORLD MAP 🗺️</a>
+        </div>
+    </div>
+
+    <div class="cyber-card">
+        <div class="challenge-meta-header">
+            <div>
+                <span class="badge-tag badge-category">CONFIDENTIAL // EYES ONLY</span>
+                <h1 class="challenge-title-main" style="margin-top: 8px;">OPERATION: RECOVER THE GOLDEN STAR</h1>
+                <p style="color: #99aacc;">Case File #OJAS-2026-CTF • Lead Detective: <strong>Inspector Mario</strong></p>
+            </div>
+            <div>
+                <span class="badge-tag badge-diff-expert">THREAT LEVEL: OMEGA</span>
+            </div>
+        </div>
+
+        <div class="terminal-window" style="margin-bottom: 24px;">
+            <div class="terminal-header">
+                <span class="term-dot dot-red"></span>
+                <span class="term-dot dot-yellow"></span>
+                <span class="term-dot dot-green"></span>
+                <span class="term-title">SECURE TELEMETRY DEBRIEF // DISPATCH 001</span>
+            </div>
+            <div class="terminal-body">
+                <p>> [SYSTEM]: INITIALIZING MUSHROOM KINGDOM INCIDENT RESPONSE MATRIX...</p>
+                <p>> [REPORT]: At 03:14:07 AM, the Master Sanctum vault security perimeter collapsed.</p>
+                <p>> [INCIDENT]: The kingdom's core power source, <strong>THE GOLDEN STAR</strong>, was forcibly exfiltrated by a rogue cyber syndicate operating under alias <strong>'PHANTOM_SHROOM'</strong>.</p>
+                <p>> [FORENSICS]: Infiltrator utilized sophisticated multi-vector exploits:</p>
+                <p>&nbsp;&nbsp;• Corrupted Web DOM payloads in Mushroom Village</p>
+                <p>&nbsp;&nbsp;• Steganographic and EXIF sensor concealment in the Dark Forest</p>
+                <p>&nbsp;&nbsp;• IDOR and JWT forged sessions in the Haunted Mansion</p>
+                <p>&nbsp;&nbsp;• SQL injection and framed account pivoting at Koopa HQ</p>
+                <p>&nbsp;&nbsp;• Final quantum lock holding the star at Sector 05: Final Fortress</p>
+                <p>> [DIRECTIVE]: Deploy detective teams immediately. Analyze evidence, decode cipher streams, extract flags, and breach the Fortress shields.</p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px;">
+            <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--border-glow); padding: 18px; border-radius: 8px;">
+                <h3 style="color: var(--cyber-cyan); font-family: var(--font-heading); margin-bottom: 10px;">⭐ SECTOR UNLOCKS</h3>
+                <p style="font-size: 0.95rem; color: #b8cbe8;">
+                    Recover Golden Stars by completing forensic investigations. Accumulate stars to dissolve the quantum firewalls protecting higher sector islands on the 3D World Map.
+                </p>
+            </div>
+            <div style="background: rgba(255, 204, 0, 0.05); border: 1px solid var(--border-glow-gold); padding: 18px; border-radius: 8px;">
+                <h3 style="color: var(--cyber-gold); font-family: var(--font-heading); margin-bottom: 10px;">🪙 CYBER COIN ECONOMY</h3>
+                <p style="font-size: 0.95rem; color: #b8cbe8;">
+                    Solve challenges or bounce 3D Question Mark Blocks to earn coins. Spend coins in the forensic terminal to purchase cryptographic hints if you get stuck.
+                </p>
+            </div>
+        </div>
+
+        <!-- SQUAD REGISTRATION & DISPATCH TERMINAL -->
+        <div class="cyber-card" style="border: 1px solid var(--cyber-cyan); background: rgba(0, 240, 255, 0.03); margin-top: 10px;">
+            <div class="card-title" style="color: var(--cyber-cyan);">
+                🕵️ SQUAD REGISTRATION & DISPATCH TERMINAL
+            </div>
+
+            <!-- Current Active Squad Indicator -->
+            <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <span style="font-size: 0.75rem; color: #8da4d0; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;">Currently Active Squad:</span>
+                    <strong id="active-squad-name" style="font-size: 1.25rem; color: #fff; font-family: var(--font-heading);">{{ team.team_name if team else 'Inspector Mario' }}</strong>
+                    <span style="margin-left: 10px; font-family: monospace; font-size: 0.85rem; color: var(--cyber-cyan); background: rgba(0, 240, 255, 0.1); padding: 3px 8px; border-radius: 4px;">
+                        🔑 CODE: {{ team.access_code if team else 'MARIO-OJAS-2026' }}
+                    </span>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div class="stat-pill score" style="font-size: 0.8rem; padding: 4px 10px;">🏆 {{ team.score if team else 0 }} PTS</div>
+                    <div class="stat-pill stars" style="font-size: 0.8rem; padding: 4px 10px;">⭐ {{ team.stars if team else 0 }} / 12</div>
+                    <div class="stat-pill coins" style="font-size: 0.8rem; padding: 4px 10px;">🪙 {{ team.coins if team else 100 }}</div>
+                </div>
+            </div>
+
+            <!-- Squad Operations Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <!-- Card 1: Register New Squad -->
+                <div style="background: rgba(0, 255, 102, 0.04); border: 1px solid rgba(0, 255, 102, 0.25); border-radius: 8px; padding: 16px;">
+                    <div style="font-family: var(--font-heading); font-size: 0.9rem; color: var(--cyber-green); margin-bottom: 8px;">
+                        ✨ REGISTER NEW PARTICIPATING SQUAD
+                    </div>
+                    <p style="font-size: 0.82rem; color: #9ab4db; margin-bottom: 12px;">
+                        Create a fresh team for the OJAS competition. Starts with 100 Cyber Coins and an independent leaderboard ranking!
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <input id="new-team-input" type="text" class="flag-input" placeholder="Enter New Squad Name (e.g. CyberVipers)" autocomplete="off" style="padding: 10px 12px; font-size: 0.9rem;">
+                        <button id="register-team-btn" class="btn-primary" style="padding: 10px 16px; font-size: 0.9rem; background: linear-gradient(135deg, #00cc55, #008833);">
+                            🚀 REGISTER SQUAD
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card 2: Switch to Existing Squad -->
+                <div style="background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 8px; padding: 16px;">
+                    <div style="font-family: var(--font-heading); font-size: 0.9rem; color: var(--cyber-cyan); margin-bottom: 8px;">
+                        🔁 SWITCH SQUAD / RESUME SESSION
+                    </div>
+                    <p style="font-size: 0.82rem; color: #9ab4db; margin-bottom: 12px;">
+                        Select a squad from the active roster or enter your team access code to resume:
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <select id="switch-team-select" class="flag-input" style="padding: 10px 12px; font-size: 0.9rem; background: #060b18;">
+                            <option value="">-- Choose Registered Squad --</option>
+                            {% for t in all_teams %}
+                            <option value="{{ t.id }}" {% if team and t.id == team.id %}selected{% endif %}>
+                                {{ t.team_name }} (⭐ {{ t.stars }} | 🏆 {{ t.score }} PTS)
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div style="display: flex; gap: 8px;">
+                            <input id="switch-code-input" type="text" class="flag-input" placeholder="Or Access Code (OJAS-XXXX)" style="padding: 8px 10px; font-size: 0.85rem;">
+                            <button id="switch-team-btn" class="btn-secondary" style="padding: 8px 14px; white-space: nowrap; font-size: 0.85rem;">
+                                SWITCH 🔁
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Rename Current Squad (Single line) -->
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <label style="font-family: var(--font-heading); font-size: 0.82rem; color: #8da4d0;">
+                        RENAME ACTIVE SQUAD:
+                    </label>
+                    <input id="team-name-input" type="text" value="{{ team.team_name if team else 'Inspector Mario' }}" class="flag-input" style="width: 260px; padding: 8px 12px; font-size: 0.9rem;">
+                    <button id="save-team-btn" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">
+                        UPDATE NAME ✏️
+                    </button>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    {% if resume_info and resume_info.is_started and not resume_info.is_finished %}
+                    <a href="{{ resume_info.resume_url }}" class="btn-primary" style="background: linear-gradient(135deg, #00ff88, #00aa44); box-shadow: 0 0 20px rgba(0, 255, 136, 0.4); padding: 12px 24px; font-size: 0.95rem; text-decoration: none;">
+                        🚀 RESUME INVESTIGATION (CASE {{ resume_info.challenge_id }})
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('game.world_map') }}" class="btn-secondary" style="padding: 12px 20px; font-size: 0.95rem;">
+                        LAUNCH 3D MAP 🗺️
+                    </a>
+                </div>
+            </div>
+
+            <!-- Inline Alert Notice -->
+            <div id="team-feedback-alert" class="flag-alert-box hidden" style="margin-top: 10px;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const alertBox = document.getElementById('team-feedback-alert');
+
+    function showFeedback(message, isSuccess = true) {
+        if (!alertBox) return;
+        alertBox.className = `flag-alert-box ${isSuccess ? 'alert-success' : 'alert-error'}`;
+        alertBox.innerHTML = `<strong>${isSuccess ? '✅' : '⚠️'} ${message}</strong>`;
+        alertBox.classList.remove('hidden');
+        alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => { alertBox.classList.add('hidden'); }, 6000);
+    }
+
+    // 1. Rename Current Squad
+    document.getElementById('save-team-btn').addEventListener('click', async () => {
+        const name = document.getElementById('team-name-input').value.trim();
+        if (!name) return showFeedback("Team name cannot be empty.", false);
+
+        try {
+            const res = await fetch('/api/team/set-name', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name })
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (window.soundFx) window.soundFx.playPowerup();
+                document.getElementById('hud-team-val').innerText = data.team.team_name;
+                document.getElementById('active-squad-name').innerText = data.team.team_name;
+                showFeedback(`Squad name updated to: ${data.team.team_name}`, true);
+            } else {
+                if (window.soundFx) window.soundFx.playError();
+                showFeedback(data.message || "Failed to update team name.", false);
+            }
+        } catch (e) {
+            showFeedback("Network error updating team name.", false);
+        }
+    });
+
+    // 2. Register New Squad
+    document.getElementById('register-team-btn').addEventListener('click', async () => {
+        const name = document.getElementById('new-team-input').value.trim();
+        if (!name) return showFeedback("Please enter a new squad name to register.", false);
+
+        try {
+            const res = await fetch('/api/team/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name })
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (window.soundFx) window.soundFx.playVictory();
+                showFeedback(`🎉 Registered & Dispatched! Welcome, ${data.team.team_name} (Code: ${data.team.access_code}). Reloading...`, true);
+                setTimeout(() => { window.location.reload(); }, 1200);
+            } else {
+                if (window.soundFx) window.soundFx.playError();
+                showFeedback(data.message || "Could not register squad.", false);
+            }
+        } catch (e) {
+            showFeedback("Network error registering squad.", false);
+        }
+    });
+
+    // 3. Switch Squad
+    document.getElementById('switch-team-btn').addEventListener('click', async () => {
+        const selectVal = document.getElementById('switch-team-select').value;
+        const codeVal = document.getElementById('switch-code-input').value.trim();
+        const identifier = codeVal || selectVal;
+
+        if (!identifier) return showFeedback("Please select a squad or enter an access code.", false);
+
+        try {
+            const res = await fetch('/api/team/switch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ identifier: identifier })
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (window.soundFx) window.soundFx.playPowerup();
+                const resumeMsg = data.resume_label ? ` • Resuming at ${data.resume_label}` : '';
+                showFeedback(`✅ Switched to squad: ${data.team.team_name}!${resumeMsg}`, true);
+                setTimeout(() => {
+                    if (data.is_started && data.resume_url) {
+                        window.location.href = data.resume_url;
+                    } else {
+                        window.location.reload();
+                    }
+                }, 1000);
+            } else {
+                if (window.soundFx) window.soundFx.playError();
+                showFeedback(data.message || "Squad not found.", false);
+            }
+        } catch (e) {
+            showFeedback("Network error switching squad.", false);
+        }
+    });
+
+    // Also auto-trigger switch on dropdown change
+    document.getElementById('switch-team-select').addEventListener('change', (e) => {
+        if (e.target.value) {
+            document.getElementById('switch-code-input').value = "";
+        }
+    });
+</script>
+{% endblock %}

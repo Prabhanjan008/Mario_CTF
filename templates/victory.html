@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}🏆 VICTORY! | Mario: The Cyber Heist{% endblock %}
+
+{% block content %}
+<div class="game-3d-container">
+    <canvas id="victory-canvas" class="webgl-canvas"></canvas>
+
+    <div class="title-overlay" style="justify-content: center; align-items: center;">
+        <div class="modal-content" style="max-width: 680px; text-align: center; border: 2px solid var(--cyber-gold); box-shadow: 0 0 50px rgba(255, 204, 0, 0.4); pointer-events: auto;">
+            <div style="font-size: 3rem; margin-bottom: 8px;">🌟 🍄 🌟</div>
+            <div class="title-badge" style="background: rgba(255, 204, 0, 0.15); border-color: var(--cyber-gold); color: var(--cyber-gold);">
+                ⚡ OJAS TECH FEST 2026 • CHAMPION DIPLOMA
+            </div>
+            <h1 style="font-family: var(--font-display); font-size: 1.8rem; color: #fff; margin-bottom: 12px;">
+                THE GOLDEN STAR RESTORED!
+            </h1>
+            <p style="color: #b0c2ee; font-size: 1.05rem; margin-bottom: 24px;">
+                Congratulations, <strong>{{ team.team_name if team else 'Inspector Mario' }}</strong>! You deciphered every forensic clue, breached the enemy networks, and vanquished Mecha-Shellshock.
+            </p>
+
+            <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 28px;">
+                <div class="stat-pill score" style="font-size: 1.1rem; padding: 10px 20px;">
+                    🏆 {{ team.score if team else 0 }} POINTS
+                </div>
+                <div class="stat-pill stars" style="font-size: 1.1rem; padding: 10px 20px;">
+                    ⭐ {{ team.stars if team else 12 }} STARS
+                </div>
+                <div class="stat-pill coins" style="font-size: 1.1rem; padding: 10px 20px;">
+                    🪙 {{ team.coins if team else 100 }} COINS
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <a href="{{ url_for('game.leaderboard') }}" class="btn-primary">
+                    VIEW LIVE LEADERBOARD 🏆
+                </a>
+                <a href="{{ url_for('game.world_map') }}" class="btn-secondary">
+                    EXPLORE WORLD MAP 🗺️
+                </a>
+                <a href="{{ url_for('game.index', home=1) }}" class="btn-secondary">
+                    🏠 RETURN TO TITLE
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // 3D Victory scene with spinning Star, coin fountain, and fireworks
+    class VictoryScene {
+        constructor() {
+            const canvas = document.getElementById('victory-canvas');
+            if (!canvas) return;
+
+            this.scene = new THREE.Scene();
+            this.scene.background = new THREE.Color(0x060818);
+
+            this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            this.camera.position.set(0, 3, 10);
+
+            this.renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            this.clock = new THREE.Clock();
+
+            // Lighting
+            const amb = new THREE.AmbientLight(0x334466, 1.5);
+            this.scene.add(amb);
+
+            const starSpot = new THREE.PointLight(0xffe600, 5, 25);
+            starSpot.position.set(0, 4, 2);
+            this.scene.add(starSpot);
+
+            // Grand Floating Golden Star
+            this.star = window.mario3D.createStar(2.4);
+            this.star.position.set(0, 2.0, -1);
+            this.scene.add(this.star);
+
+            // Orbiting gold coins
+            this.orbitCoins = [];
+            for (let i = 0; i < 8; i++) {
+                const coin = window.mario3D.createCoin(0.65, 0.14);
+                this.scene.add(coin);
+                this.orbitCoins.push(coin);
+            }
+
+            // Cyber confetti particles
+            this.particles = window.mario3D.createMatrixParticles(800, 40);
+            this.scene.add(this.particles);
+
+            if (window.soundFx) {
+                window.soundFx.playVictory();
+            }
+
+            this.animate();
+        }
+
+        animate() {
+            requestAnimationFrame(() => this.animate());
+            const delta = Math.min(this.clock.getDelta(), 0.1);
+            const time = this.clock.getElapsedTime();
+
+            if (this.star) {
+                this.star.rotation.y += delta * 2.0;
+                this.star.position.y = 2.0 + Math.sin(time * 2.5) * 0.3;
+            }
+
+            this.orbitCoins.forEach((c, idx) => {
+                const angle = time * 1.5 + (idx / this.orbitCoins.length) * Math.PI * 2;
+                c.position.x = Math.cos(angle) * 4.2;
+                c.position.z = -1 + Math.sin(angle) * 4.2;
+                c.position.y = 2.0 + Math.sin(time * 3 + idx) * 0.4;
+                c.rotation.y += delta * 4;
+            });
+
+            if (this.particles && this.particles.userData.update) {
+                this.particles.userData.update(delta);
+            }
+
+            this.renderer.render(this.scene, this.camera);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        new VictoryScene();
+    });
+</script>
+{% endblock %}

