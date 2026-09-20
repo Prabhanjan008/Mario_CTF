@@ -23,37 +23,47 @@
             <nav class="hud-nav">
                 <a href="{{ url_for('game.index', home=1) }}" class="nav-link {% if request.path == '/' %}active{% endif %}" title="Title Island & Coin Harvest">HOME</a>
                 {% if resume_info and resume_info.is_started and not resume_info.is_finished %}
-                <a href="{{ resume_info.resume_url }}" class="nav-link" style="color: #00ff88; border-color: rgba(0, 255, 136, 0.5); background: rgba(0, 255, 136, 0.15); font-weight: bold; text-shadow: 0 0 10px rgba(0,255,136,0.6);" title="Jump directly to where you stopped!">
-                    🚀 RESUME CASE {{ resume_info.challenge_id }}
+                <a href="{{ resume_info.resume_url }}" class="nav-link nav-resume-pill" title="Jump directly to where you stopped!">
+                    🚀 RESUME (CASE {{ resume_info.challenge_id }})
                 </a>
                 {% endif %}
                 <a href="{{ url_for('game.briefing') }}" class="nav-link {% if request.path == '/briefing' %}active{% endif %}">BRIEFING</a>
                 <a href="{{ url_for('game.world_map') }}" class="nav-link {% if request.path == '/map' %}active{% endif %}">3D MAP</a>
                 <a href="{{ url_for('game.leaderboard') }}" class="nav-link {% if request.path == '/leaderboard' %}active{% endif %}">LEADERBOARD</a>
+                <a href="{{ url_for('game.end_section') }}" class="nav-link {% if request.path in ['/end', '/debrief'] %}active{% endif %}" title="Official Mission Debriefing">DEBRIEF</a>
                 {% if session.get('is_admin') %}
-                <a href="{{ url_for('admin.admin_panel') }}" class="nav-link {% if request.path.startswith('/admin') %}active{% endif %}" style="color: var(--mario-red); font-weight: bold; border-color: rgba(255, 42, 77, 0.4); background: rgba(255, 42, 77, 0.1);">⚙️ ADMIN</a>
+                <a href="{{ url_for('admin.admin_panel') }}" class="nav-link nav-admin-pill {% if request.path.startswith('/admin') %}active{% endif %}" title="Organizer Control Terminal">⚙️ ADMIN</a>
                 {% else %}
-                <a href="{{ url_for('admin.admin_panel') }}" class="nav-link {% if request.path.startswith('/admin') %}active{% endif %}" style="color: #8da4d0; border-color: rgba(255, 255, 255, 0.15);" title="Organizer Access (Master Key Required)">🔐 ADMIN</a>
+                <a href="{{ url_for('admin.admin_panel') }}" class="nav-link nav-admin-pill {% if request.path.startswith('/admin') %}active{% endif %}" title="Organizer Access (Master Key Required)">🔐 ADMIN</a>
                 {% endif %}
             </nav>
         </div>
 
         <div class="hud-stats">
             <div class="stat-pill team" title="Investigator Identity">
-                🕵️ <span id="hud-team-val">{{ team.team_name if team else 'Inspector Mario' }}</span>
+                🕵️ <span id="hud-team-val" class="stat-team-name">{{ team.team_name if team else 'Inspector Mario' }}</span>
             </div>
             <div class="stat-pill score" title="Forensic Points">
-                🏆 <span id="hud-score-val">{{ team.score if team else 0 }}</span> PTS
+                🏆 <span id="hud-score-val">{{ team.score if team else 0 }}</span> <span class="stat-unit">PTS</span>
             </div>
             <div class="stat-pill coins" title="Cyber Coins (Click 3D ? Blocks to earn)">
                 🪙 <span id="hud-coins-val">{{ team.coins if team else 100 }}</span>
             </div>
             <div class="stat-pill stars" title="Golden Stars Recovered">
-                ⭐ <span id="hud-stars-val">{{ team.stars if team else 0 }}</span> / 12
+                ⭐ <span id="hud-stars-val">{{ team.stars if team else 0 }}</span>/12
             </div>
             <div class="stat-pill timer" id="hud-timer-pill" data-started-at="{{ team.started_at if team and team.started_at else '' }}" data-finished-at="{{ team.finished_at if team and team.finished_at else '' }}" data-total-time="{{ team.total_time if team and team.total_time else '' }}" title="Mission Clock • Click to toggle between elapsed timer and local clock">
                 ⏱️ <span id="hud-timer-val">00:00:00</span>
             </div>
+            {% if team and team.finished_at %}
+            <a href="{{ url_for('game.end_section') }}" class="btn-hud-debrief" title="Mission Concluded • View Official Debriefing">
+                📋 DEBRIEF
+            </a>
+            {% else %}
+            <button id="btn-open-stop-modal" class="btn-hud-stop" title="Stop competition timer & conclude mission">
+                ⏹️ STOP
+            </button>
+            {% endif %}
             <button id="sound-toggle-btn" class="audio-btn" title="Toggle 8-bit Audio">🔊</button>
         </div>
     </header>
@@ -63,12 +73,56 @@
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Stop / Conclude Mission Modal -->
+    <div id="stop-mission-modal" class="cinematic-modal hidden" style="background: rgba(3, 5, 15, 0.88); backdrop-filter: blur(10px); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+        <div class="cyber-card" style="max-width: 520px; width: 92%; border: 2px solid var(--mario-red); box-shadow: 0 0 40px rgba(255, 26, 64, 0.45); text-align: center; pointer-events: auto; padding: 28px 24px;">
+            <div style="font-size: 2.8rem; margin-bottom: 8px;">🛑 ⏱️ 🛑</div>
+            <div class="title-badge" style="background: rgba(255, 42, 77, 0.15); border-color: var(--mario-red); color: var(--mario-red); margin-bottom: 12px; display: inline-block;">
+                ⚠️ CONCLUDE INVESTIGATION & STOP CLOCK
+            </div>
+            <h2 style="font-family: var(--font-display); font-size: 1.4rem; color: #fff; margin-bottom: 10px;">
+                END ACTIVE CTF MISSION?
+            </h2>
+            <p style="color: #b0c4de; font-size: 0.92rem; line-height: 1.5; margin-bottom: 20px;">
+                Stopping the mission will <strong style="color: #ff3366;">freeze your competition timer permanently</strong> and lock your final score of <strong style="color: var(--cyber-green);" id="modal-score-val">{{ team.score if team else 0 }} PTS</strong> and <strong style="color: var(--cyber-gold);">{{ team.stars if team else 0 }}/12 Stars</strong> onto the live OJAS Leaderboard.
+            </p>
+
+            <!-- Mini Telemetry Snapshot -->
+            <div style="background: rgba(0, 0, 0, 0.4); border: 1px dashed rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 12px 16px; margin-bottom: 22px; display: flex; justify-content: space-around; align-items: center;">
+                <div>
+                    <div style="font-size: 0.72rem; color: #8da4d0; font-family: var(--font-heading);">SQUAD</div>
+                    <div style="font-family: var(--font-heading); color: #fff; font-size: 0.95rem; font-weight: bold;">{{ team.team_name if team else 'Inspector Mario' }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.72rem; color: #8da4d0; font-family: var(--font-heading);">CURRENT TIME</div>
+                    <div style="font-family: var(--font-display); color: var(--cyber-cyan); font-size: 1.15rem;" id="modal-timer-val">00:00:00</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.72rem; color: #8da4d0; font-family: var(--font-heading);">FINAL SCORE</div>
+                    <div style="font-family: var(--font-heading); color: #00ff88; font-size: 1.1rem; font-weight: bold;">{{ team.score if team else 0 }} PTS</div>
+                </div>
+            </div>
+
+            <!-- Confirm / Cancel Buttons -->
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <button id="modal-confirm-stop-btn" class="btn-primary" style="background: linear-gradient(135deg, #ff1a40, #99001f); border-color: #ff4d6d; box-shadow: 0 0 20px rgba(255, 26, 64, 0.5); padding: 12px 24px; font-size: 0.95rem;">
+                    🛑 YES, STOP MISSION & FINISH
+                </button>
+                <button id="modal-cancel-stop-btn" class="btn-secondary" style="padding: 12px 20px; font-size: 0.9rem;">
+                    ✖️ CANCEL (KEEP PLAYING)
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Global Offline Footer -->
     <footer style="padding: 16px 28px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.8rem; color: #5a729c; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 30px;">
         <div>
             ⚡ <strong>CHANAKYA UNIVERSITY • OJAS TECH FEST 2026</strong> // MARIO: THE CYBER HEIST
         </div>
         <div style="display: flex; gap: 16px; align-items: center;">
+            <a href="{{ url_for('game.end_section') }}" style="color: var(--cyber-gold); text-decoration: none; font-weight: bold;">🏁 Mission Debrief</a>
+            <span>•</span>
             <a href="{{ url_for('game.briefing') }}" style="color: #8da4d0; text-decoration: none;">Squad Dispatch</a>
             <span>•</span>
             <a href="{{ url_for('game.leaderboard') }}" style="color: #8da4d0; text-decoration: none;">Live Standings</a>
@@ -105,6 +159,57 @@
             {% endif %}
         } catch (e) {}
         {% endif %}
+
+        // Stop Mission Modal Logic
+        const stopBtn = document.getElementById('btn-open-stop-modal');
+        const stopModal = document.getElementById('stop-mission-modal');
+        const cancelStopBtn = document.getElementById('modal-cancel-stop-btn');
+        const confirmStopBtn = document.getElementById('modal-confirm-stop-btn');
+        const modalTimerVal = document.getElementById('modal-timer-val');
+
+        if (stopBtn && stopModal) {
+            stopBtn.addEventListener('click', () => {
+                const curTimer = document.getElementById('hud-timer-val');
+                if (curTimer && modalTimerVal) {
+                    modalTimerVal.innerText = curTimer.innerText.trim();
+                }
+                stopModal.classList.remove('hidden');
+                if (window.soundFx) window.soundFx.playPowerup();
+            });
+        }
+
+        if (cancelStopBtn && stopModal) {
+            cancelStopBtn.addEventListener('click', () => {
+                stopModal.classList.add('hidden');
+            });
+        }
+
+        if (confirmStopBtn) {
+            confirmStopBtn.addEventListener('click', async () => {
+                confirmStopBtn.disabled = true;
+                confirmStopBtn.innerText = 'LOCKING MISSION CLOCK...';
+
+                try {
+                    const res = await fetch('/api/team/stop-mission', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        if (window.soundFx) window.soundFx.playVictory();
+                        window.location.href = data.redirect_url || '/end';
+                    } else {
+                        alert(data.message || 'Failed to stop mission.');
+                        confirmStopBtn.disabled = false;
+                        confirmStopBtn.innerText = '🛑 YES, STOP MISSION & FINISH';
+                    }
+                } catch (e) {
+                    alert('Network error while locking competition timer.');
+                    confirmStopBtn.disabled = false;
+                    confirmStopBtn.innerText = '🛑 YES, STOP MISSION & FINISH';
+                }
+            });
+        }
     </script>
     {% block extra_scripts %}{% endblock %}
 </body>

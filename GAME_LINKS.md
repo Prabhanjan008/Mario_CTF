@@ -16,6 +16,8 @@
   *(Navigate Detective Mario across 5 cyber sectors)*
 * 🏆 **Live Competition Leaderboard:** [http://127.0.0.1:5000/leaderboard](http://127.0.0.1:5000/leaderboard)  
   *(Real-time scores, solve times, and organizer reset button)*
+* 🏁 **Mission Debrief & Official End Screen:** [http://127.0.0.1:5000/end](http://127.0.0.1:5000/end)  
+  *(Concluded run telemetry, locked timer, and 12-case audit stream)*
 * 👑 **Victory Ceremony (Post-Boss):** [http://127.0.0.1:5000/victory](http://127.0.0.1:5000/victory)  
   *(Unlocked after solving Case 12)*
 
@@ -28,6 +30,7 @@ Share this IP link with participants in the lab or hall:
 * 📋 **Squad Registration:** `http://192.168.100.7:5000/briefing`
 * 🗺️ **3D World Map:** `http://192.168.100.7:5000/map`
 * 🏆 **Live Leaderboard:** `http://192.168.100.7:5000/leaderboard`
+* 🏁 **Mission Debrief:** `http://192.168.100.7:5000/end`
 
 *(Note: If participants cannot connect across the college Wi-Fi, ensure Windows Defender Firewall allows inbound connections on port 5000).*
 

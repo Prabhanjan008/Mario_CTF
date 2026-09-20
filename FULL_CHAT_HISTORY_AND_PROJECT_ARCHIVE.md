@@ -415,3 +415,28 @@ Server listens on `0.0.0.0:5000` (Local: `http://127.0.0.1:5000/`, Network: `htt
 
 ### Exporting Final Results
 - From `/admin`, click **EXPORT CSV** or **EXPORT JSON** to instantly download the final podium rankings for certificate generation and prize distribution.
+
+---
+
+## 9. NAVIGATION HUD REALIGNMENT, STOP MISSION FLOW & END DEBRIEF SECTION
+
+### Top Navigation HUD Arrangement
+- **Single-Line Enactment**: Fixed unsightly line wrapping on buttons (`[🚀 RESUME CASE X]`, `[3D MAP]`, `[🔐 ADMIN]`) by enforcing `white-space: nowrap !important;`.
+- **Height & Spacing Optimization**: Fixed HUD height to `56px` with backdrop blur, balanced padding, unified `0.76rem` typography, and locked stat pill heights at `30px`.
+- **Responsive Handling**: Scaled down font sizes and margins on smaller displays (`@media (max-width: 1200px)` and `992px`) so no elements wrap or cause horizontal overflow.
+
+### Dedicated Stop Button & Confirmation Modal
+- **HUD Placement**: Placed a glowing neon red/amber button **`[ ⏹️ STOP ]`** directly next to the timer badge in the top navigation bar, on challenge investigation pages, and in `/briefing`.
+- **Telemetry Snapshot Modal (`#stop-mission-modal`)**: Presents an interactive mission review displaying Squad Name, Stars Recovered (`X / 12`), Forensic Points, and Elapsed Time.
+- **Backend Stop Handler (`POST /api/team/stop-mission`)**: Freezes the competition timer, locks `teams.finished_at` and `teams.total_time`, and returns a direct redirection to `/end`.
+
+### Dedicated End Section / Mission Debrief Screen (`/end` and `/debrief`)
+- **Template**: `templates/end.html`
+- **Official Telemetry Cards**:
+  1. **Leaderboard Standing**: Rank `#X` out of all registered squads.
+  2. **Official Final Time**: Frozen and verified competition clock (`HH:MM:SS`).
+  3. **Final Forensic Score**: Total points earned.
+  4. **Recovered Artifacts**: Total Stars (`X / 12`) and remaining coins.
+- **Forensic Classification Grades**: From 👑 Master Operative (Grade I) for 12 stars down to 🔰 Trainee Investigator.
+- **Case Investigation Audit Stream**: Interactive matrix of all 12 CTF cases with `SOLVED ✅` or `PENDING ⏳` status badges.
+- **Interactive Controls**: View Live Leaderboard, Reopen Mission (`POST /api/team/reopen-mission`), Squad Dispatch, and Return to Title Screen.

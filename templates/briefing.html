@@ -147,6 +147,13 @@
                     <a href="{{ resume_info.resume_url }}" class="btn-primary" style="background: linear-gradient(135deg, #00ff88, #00aa44); box-shadow: 0 0 20px rgba(0, 255, 136, 0.4); padding: 12px 24px; font-size: 0.95rem; text-decoration: none;">
                         🚀 RESUME INVESTIGATION (CASE {{ resume_info.challenge_id }})
                     </a>
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('btn-open-stop-modal')?.click();" style="border-color: rgba(255, 26, 64, 0.4); color: #ff3366; padding: 12px 18px; font-size: 0.9rem;" title="Stop competition timer & conclude run">
+                        ⏹️ STOP MISSION
+                    </button>
+                    {% elif team and team.finished_at %}
+                    <a href="{{ url_for('game.end_section') }}" class="btn-primary" style="background: linear-gradient(135deg, var(--cyber-gold), #b38600); box-shadow: 0 0 20px rgba(255, 204, 0, 0.4); padding: 12px 24px; font-size: 0.95rem; text-decoration: none;">
+                        🏁 VIEW MISSION DEBRIEF
+                    </a>
                     {% endif %}
                     <a href="{{ url_for('game.world_map') }}" class="btn-secondary" style="padding: 12px 20px; font-size: 0.95rem;">
                         LAUNCH 3D MAP 🗺️

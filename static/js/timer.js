@@ -36,6 +36,10 @@
 
         if (timerPill) {
             timerPill.addEventListener('click', () => {
+                if (rawFinished || totalTime) {
+                    window.location.href = '/end';
+                    return;
+                }
                 showClockMode = !showClockMode;
                 updateDisplay();
                 if (window.soundFx) window.soundFx.playCoin();

@@ -36,12 +36,15 @@
                 <a href="{{ resume_info.resume_url }}" class="btn-primary btn-start-heist" style="background: linear-gradient(135deg, #00ff88, #00aa44); box-shadow: 0 0 25px rgba(0, 255, 136, 0.5); text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
                     🚀 RESUME MISSION: CASE {{ resume_info.challenge_id }}
                 </a>
+                <button type="button" class="btn-secondary" onclick="document.getElementById('btn-open-stop-modal')?.click();" style="border-color: rgba(255, 26, 64, 0.5); color: #ff3366;" title="Conclude mission & freeze competition clock">
+                    ⏹️ STOP MISSION
+                </button>
                 <button id="btn-play-cinematic" class="btn-secondary" style="border-color: rgba(255, 255, 255, 0.3);">
                     🎬 REPLAY CINEMATIC
                 </button>
                 {% elif resume_info and resume_info.is_finished %}
-                <a href="{{ url_for('game.victory') }}" class="btn-primary btn-start-heist" style="background: linear-gradient(135deg, var(--cyber-gold), #cc9900); box-shadow: 0 0 25px rgba(255, 204, 0, 0.5); text-decoration: none;">
-                    🏆 VICTORY CEREMONY (COMPLETED)
+                <a href="{{ resume_info.resume_url }}" class="btn-primary btn-start-heist" style="background: linear-gradient(135deg, var(--cyber-gold), #cc9900); box-shadow: 0 0 25px rgba(255, 204, 0, 0.5); text-decoration: none;">
+                    {{ "🏆 VICTORY CEREMONY (CHAMPION)" if resume_info.is_champion else "🏁 MISSION DEBRIEF (CONCLUDED)" }}
                 </a>
                 <button id="btn-play-cinematic" class="btn-secondary" style="border-color: rgba(255, 255, 255, 0.3);">
                     🎬 REPLAY CINEMATIC
@@ -56,6 +59,9 @@
                 </a>
                 <a href="{{ url_for('game.briefing') }}" class="btn-secondary">
                     📋 MISSION BRIEFING
+                </a>
+                <a href="{{ url_for('game.end_section') }}" class="btn-secondary" title="Official Mission Debriefing">
+                    🏁 DEBRIEF
                 </a>
             </div>
         </div>

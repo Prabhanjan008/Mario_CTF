@@ -127,10 +127,13 @@ def finish_team_timer(team_id: int):
     now_str = now.strftime("%Y-%m-%d %H:%M:%S")
     with db_session() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT started_at, finished_at FROM teams WHERE id = ?", (team_id,))
+        cursor.execute("SELECT started_at, finished_at, total_time FROM teams WHERE id = ?", (team_id,))
         row = cursor.fetchone()
-        if not row or row["finished_at"] is not None:
+        if not row:
             return None
+        if row["finished_at"] is not None:
+            cursor.execute("SELECT * FROM teams WHERE id = ?", (team_id,))
+            return dict(cursor.fetchone())
 
         started_str = row["started_at"]
         total_time_str = "00:00:00"
@@ -144,12 +147,26 @@ def finish_team_timer(team_id: int):
                 total_time_str = f"{h:02d}:{m:02d}:{s:02d}"
             except Exception:
                 pass
+        else:
+            started_str = now_str
 
         cursor.execute("""
             UPDATE teams
-            SET finished_at = ?, total_time = ?
+            SET finished_at = ?, total_time = ?, started_at = COALESCE(started_at, ?)
             WHERE id = ? AND finished_at IS NULL
-        """, (now_str, total_time_str, team_id))
+        """, (now_str, total_time_str, started_str, team_id))
+        cursor.execute("SELECT * FROM teams WHERE id = ?", (team_id,))
+        updated = cursor.fetchone()
+        return dict(updated) if updated else None
+
+def reopen_team_mission(team_id: int):
+    with db_session() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE teams
+            SET finished_at = NULL, total_time = NULL
+            WHERE id = ?
+        """, (team_id,))
         cursor.execute("SELECT * FROM teams WHERE id = ?", (team_id,))
         updated = cursor.fetchone()
         return dict(updated) if updated else None
@@ -198,13 +215,17 @@ def get_team_resume_target(team_id: int) -> dict:
         cursor.execute("SELECT COUNT(*) as solved_total FROM solved_challenges WHERE team_id = ?", (team_id,))
         solved_total = cursor.fetchone()["solved_total"]
         if team.get("finished_at") is not None or solved_total >= 12 or team.get("stars", 0) >= 12:
+            is_12_stars = bool(solved_total >= 12 or team.get("stars", 0) >= 12)
+            target_url = "/victory" if is_12_stars else "/end"
+            target_label = "Victory Ceremony (Champion)" if is_12_stars else f"Official Mission Debrief (Locked: {team.get('total_time', '00:00:00')})"
             return {
                 "is_started": True,
                 "is_finished": True,
+                "is_champion": is_12_stars,
                 "challenge_id": 12,
                 "challenge_title": "Master Key Synthesis: The Mecha-Shellshock Showdown",
-                "resume_url": "/victory",
-                "resume_label": "Victory Ceremony (All 12 Cases Solved!)",
+                "resume_url": target_url,
+                "resume_label": target_label,
                 "world_id": 5,
                 "world_name": "Final Fortress"
             }

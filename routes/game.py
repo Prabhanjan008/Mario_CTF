@@ -7,7 +7,9 @@ from models.team import (
     register_team,
     update_team_name,
     get_team_by_code,
-    get_team_resume_target
+    get_team_resume_target,
+    finish_team_timer,
+    reopen_team_mission
 )
 from models.challenge import get_worlds_with_status
 
@@ -57,6 +59,62 @@ def world_map():
 def victory():
     team = get_current_team()
     return render_template("victory.html", team=team)
+
+@game_bp.route("/end")
+@game_bp.route("/debrief")
+def end_section():
+    team = get_current_team()
+    with db_session() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT c.id, c.title, c.points, c.coins_reward, c.star_reward, c.category, c.difficulty, c.world_id,
+                   w.name as world_name, w.icon as world_icon,
+                   sc.id as is_solved, sc.solved_at
+            FROM challenges c
+            JOIN worlds w ON c.world_id = w.id
+            LEFT JOIN solved_challenges sc ON c.id = sc.challenge_id AND sc.team_id = ?
+            ORDER BY c.id ASC
+        """, (team["id"],))
+        challenges_status = [dict(r) for r in cursor.fetchall()]
+
+        # Compute rank
+        cursor.execute("""
+            SELECT id FROM teams
+            ORDER BY score DESC, stars DESC,
+                     CASE WHEN finished_at IS NOT NULL THEN 0 ELSE 1 END,
+                     CASE WHEN total_time IS NOT NULL THEN total_time ELSE '999:99:99' END ASC,
+                     last_active ASC
+        """)
+        all_ids = [r["id"] for r in cursor.fetchall()]
+        rank = (all_ids.index(team["id"]) + 1) if team["id"] in all_ids else 1
+        total_teams = len(all_ids)
+
+    return render_template("end.html", team=team, challenges_status=challenges_status, rank=rank, total_teams=total_teams)
+
+@game_bp.route("/api/team/stop-mission", methods=["POST"])
+def api_stop_mission():
+    team = get_current_team()
+    updated = finish_team_timer(team["id"])
+    if not updated:
+        updated = get_team_by_id(team["id"])
+    return jsonify({
+        "success": True,
+        "message": f"Mission concluded! Competition clock locked at {updated.get('total_time', '00:00:00')}.",
+        "team": updated,
+        "redirect_url": "/end"
+    })
+
+@game_bp.route("/api/team/reopen-mission", methods=["POST"])
+def api_reopen_mission():
+    team = get_current_team()
+    updated = reopen_team_mission(team["id"])
+    resume_target = get_team_resume_target(team["id"])
+    return jsonify({
+        "success": True,
+        "message": "Mission resumed! Competition clock reopened.",
+        "team": updated,
+        "redirect_url": resume_target["resume_url"]
+    })
 
 @game_bp.route("/leaderboard")
 def leaderboard():

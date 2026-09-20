@@ -8,6 +8,7 @@ Chanakya University • OJAS Tech Fest 2026
 * Squad Registration:  http://127.0.0.1:5000/briefing
 * 3D World Map:        http://127.0.0.1:5000/map
 * Leaderboard:         http://127.0.0.1:5000/leaderboard
+* Mission Debrief:     http://127.0.0.1:5000/end
 * Victory Ceremony:    http://127.0.0.1:5000/victory
 * Boss Arena:          http://127.0.0.1:5000/boss
 
@@ -17,6 +18,7 @@ Share these links with teams connected to the same college Wi-Fi / LAN network:
 * Team Registration:   http://192.168.100.7:5000/briefing
 * 3D Map:              http://192.168.100.7:5000/map
 * Live Leaderboard:    http://192.168.100.7:5000/leaderboard
+* Mission Debrief:     http://192.168.100.7:5000/end
 
 --- 3. HOST / ORGANIZER ACCESS (CONFIDENTIAL) ---
 * Host Admin Terminal: http://127.0.0.1:5000/admin
