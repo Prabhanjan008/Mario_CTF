@@ -145,7 +145,7 @@ def victory():
     with db_session() as sess:
         team, member = get_current_team_and_member(sess)
         if not team:
-            return redirect(url_for("game.landing"))
+            return redirect(url_for("game.index"))
         team_dict = team.to_dict()
         run_info = get_team_run_info(team)
         normal_stars = calculate_normal_stars(team.id, sess)
@@ -168,7 +168,7 @@ def end_section():
     with db_session() as sess:
         team, member = get_current_team_and_member(sess)
         if not team:
-            return redirect(url_for("game.landing"))
+            return redirect(url_for("game.index"))
         team_dict = team.to_dict()
 
         # Audit stream of 12 challenges
