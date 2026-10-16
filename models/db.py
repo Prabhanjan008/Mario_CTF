@@ -18,10 +18,22 @@ DEFAULT_SQLITE_PATH = os.path.abspath(os.path.join(DB_DIR, "game.db"))
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if not DATABASE_URL:
-    # Ensure database directory exists
-    os.makedirs(DB_DIR, exist_ok=True)
-    clean_path = DEFAULT_SQLITE_PATH.replace("\\", "/")
-    DATABASE_URL = f"sqlite:///{clean_path}"
+    if os.environ.get("VERCEL"):
+        import shutil
+        import tempfile
+        tmp_dir = tempfile.gettempdir()
+        tmp_db = os.path.join(tmp_dir, "game.db").replace("\\", "/")
+        if not os.path.exists(tmp_db) and os.path.exists(DEFAULT_SQLITE_PATH):
+            try:
+                shutil.copyfile(DEFAULT_SQLITE_PATH, tmp_db)
+            except Exception:
+                pass
+        DATABASE_URL = f"sqlite:///{tmp_db}"
+    else:
+        # Ensure database directory exists
+        os.makedirs(DB_DIR, exist_ok=True)
+        clean_path = DEFAULT_SQLITE_PATH.replace("\\", "/")
+        DATABASE_URL = f"sqlite:///{clean_path}"
 
 # Normalise Postgres URL format if provided as postgres:// (e.g. from Heroku/Render)
 if DATABASE_URL.startswith("postgres://"):
