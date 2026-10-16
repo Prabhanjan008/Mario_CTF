@@ -98,6 +98,7 @@
                     </p>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <input id="new-team-input" type="text" class="flag-input" placeholder="Enter New Squad Name (e.g. CyberVipers)" autocomplete="off" style="padding: 10px 12px; font-size: 0.9rem;">
+                        <input id="new-member-input" type="text" class="flag-input" placeholder="Your Investigator Handle (e.g. Neo)" autocomplete="off" style="padding: 8px 12px; font-size: 0.85rem;">
                         <button id="register-team-btn" class="btn-primary" style="padding: 10px 16px; font-size: 0.9rem; background: linear-gradient(135deg, #00cc55, #008833);">
                             🚀 REGISTER SQUAD
                         </button>
@@ -107,24 +108,25 @@
                 <!-- Card 2: Switch to Existing Squad -->
                 <div style="background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 8px; padding: 16px;">
                     <div style="font-family: var(--font-heading); font-size: 0.9rem; color: var(--cyber-cyan); margin-bottom: 8px;">
-                        🔁 SWITCH SQUAD / RESUME SESSION
+                        🔁 JOIN / SWITCH SQUAD BY ACCESS CODE
                     </div>
                     <p style="font-size: 0.82rem; color: #9ab4db; margin-bottom: 12px;">
-                        Select a squad from the active roster or enter your team access code to resume:
+                        Join your team from any device using their secret access code (OJAS-XXXXXXXX):
                     </p>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <select id="switch-team-select" class="flag-input" style="padding: 10px 12px; font-size: 0.9rem; background: #060b18;">
-                            <option value="">-- Choose Registered Squad --</option>
-                            {% for t in all_teams %}
-                            <option value="{{ t.id }}" {% if team and t.id == team.id %}selected{% endif %}>
-                                {{ t.team_name }} (⭐ {{ t.stars }} | 🏆 {{ t.score }} PTS)
-                            </option>
-                            {% endfor %}
-                        </select>
+                        <input id="switch-code-input" type="text" class="flag-input" placeholder="Squad Access Code (e.g. OJAS-9K3M4X7P)" style="padding: 9px 12px; font-size: 0.9rem; font-family: monospace; text-transform: uppercase;">
+                        <input id="switch-member-input" type="text" class="flag-input" placeholder="Your Investigator Handle (e.g. Trinity)" style="padding: 8px 12px; font-size: 0.85rem;">
                         <div style="display: flex; gap: 8px;">
-                            <input id="switch-code-input" type="text" class="flag-input" placeholder="Or Access Code (OJAS-XXXX)" style="padding: 8px 10px; font-size: 0.85rem;">
+                            <select id="switch-team-select" class="flag-input" style="padding: 8px 10px; font-size: 0.82rem; background: #060b18; flex: 1;">
+                                <option value="">-- Or Choose Public Squad --</option>
+                                {% for t in all_teams %}
+                                <option value="{{ t.id }}" {% if team and t.id == team.id %}selected{% endif %}>
+                                    {{ t.team_name }} (⭐ {{ t.stars }} | 🏆 {{ t.score }} PTS)
+                                </option>
+                                {% endfor %}
+                            </select>
                             <button id="switch-team-btn" class="btn-secondary" style="padding: 8px 14px; white-space: nowrap; font-size: 0.85rem;">
-                                SWITCH 🔁
+                                JOIN SQUAD 🚀
                             </button>
                         </div>
                     </div>
@@ -189,7 +191,10 @@
         try {
             const res = await fetch('/api/team/set-name', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': window.getCsrfToken()
+                },
                 body: JSON.stringify({ name: name })
             });
             const data = await res.json();
@@ -210,19 +215,23 @@
     // 2. Register New Squad
     document.getElementById('register-team-btn').addEventListener('click', async () => {
         const name = document.getElementById('new-team-input').value.trim();
+        const memberName = (document.getElementById('new-member-input')?.value || '').trim() || 'Leader';
         if (!name) return showFeedback("Please enter a new squad name to register.", false);
 
         try {
             const res = await fetch('/api/team/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: name })
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': window.getCsrfToken()
+                },
+                body: JSON.stringify({ name: name, member_name: memberName })
             });
             const data = await res.json();
             if (data.success) {
                 if (window.soundFx) window.soundFx.playVictory();
-                showFeedback(`🎉 Registered & Dispatched! Welcome, ${data.team.team_name} (Code: ${data.team.access_code}). Reloading...`, true);
-                setTimeout(() => { window.location.reload(); }, 1200);
+                showFeedback(`🎉 Registered! Welcome, ${data.team.team_name} (Code: ${data.team.access_code}). Entering Standby Lobby...`, true);
+                setTimeout(() => { window.location.href = '/lobby'; }, 1000);
             } else {
                 if (window.soundFx) window.soundFx.playError();
                 showFeedback(data.message || "Could not register squad.", false);
@@ -232,35 +241,34 @@
         }
     });
 
-    // 3. Switch Squad
+    // 3. Switch / Join Squad
     document.getElementById('switch-team-btn').addEventListener('click', async () => {
         const selectVal = document.getElementById('switch-team-select').value;
         const codeVal = document.getElementById('switch-code-input').value.trim();
+        const memberName = (document.getElementById('switch-member-input')?.value || '').trim() || 'Agent';
         const identifier = codeVal || selectVal;
 
-        if (!identifier) return showFeedback("Please select a squad or enter an access code.", false);
+        if (!identifier) return showFeedback("Please enter your squad access code or select a squad.", false);
 
         try {
             const res = await fetch('/api/team/switch', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ identifier: identifier })
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': window.getCsrfToken()
+                },
+                body: JSON.stringify({ identifier: identifier, member_name: memberName })
             });
             const data = await res.json();
             if (data.success) {
                 if (window.soundFx) window.soundFx.playPowerup();
-                const resumeMsg = data.resume_label ? ` • Resuming at ${data.resume_label}` : '';
-                showFeedback(`✅ Switched to squad: ${data.team.team_name}!${resumeMsg}`, true);
+                showFeedback(`✅ Switched to squad: ${data.team.team_name}! Entering Lobby...`, true);
                 setTimeout(() => {
-                    if (data.is_started && data.resume_url) {
-                        window.location.href = data.resume_url;
-                    } else {
-                        window.location.reload();
-                    }
+                    window.location.href = '/lobby';
                 }, 1000);
             } else {
                 if (window.soundFx) window.soundFx.playError();
-                showFeedback(data.message || "Squad not found.", false);
+                showFeedback(data.message || "Squad not found. Verify your access code.", false);
             }
         } catch (e) {
             showFeedback("Network error switching squad.", false);

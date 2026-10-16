@@ -1,121 +1,195 @@
+"""
+Challenge Presentation & Flag Verification Controller (Thin Routes).
+Delegates to progression_service, challenge_service, and boss_service.
+Includes server-side APIs for the 3-stage Boss Showdown.
+"""
+
 from flask import Blueprint, render_template, session, redirect, url_for, request, jsonify
-from models.team import (
-    get_or_create_default_team,
-    get_team_by_id,
-    start_team_timer,
-    finish_team_timer,
-    update_team_last_challenge
-)
-from models.challenge import (
-    get_worlds_with_status,
-    get_challenges_by_world,
+from models.db import db_session
+from models.schema import Team
+from services.auth_service import get_current_team_and_member, get_client_ip, validate_csrf
+from services.progression_service import (
+    is_challenge_unlocked,
     get_challenge_detail,
-    verify_and_solve_flag,
-    unlock_hint
+    get_challenges_by_world,
+    get_worlds_with_status,
+    calculate_normal_stars,
+    BOSS_REQUIRED_STARS
+)
+from services.challenge_service import verify_and_solve_flag, unlock_hint
+from services.run_service import start_team_run, get_team_run_info
+from services.boss_service import (
+    get_boss_status,
+    submit_stage1_shield,
+    submit_stage2_trivia,
+    submit_stage3_final_flag
 )
 
 challenges_bp = Blueprint("challenges", __name__)
 
-def get_current_team():
-    team_id = session.get("team_id")
-    if team_id:
-        team = get_team_by_id(team_id)
-        if team:
-            return team
-    default_team = get_or_create_default_team()
-    session["team_id"] = default_team["id"]
-    return default_team
+
+def get_current_team_id() -> int:
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        return team.id if team else None
+
 
 @challenges_bp.route("/challenge/<int:challenge_id>")
 def view_challenge(challenge_id: int):
-    team = get_current_team()
-    challenge = get_challenge_detail(challenge_id, team["id"])
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        if not team:
+            return redirect(url_for("game.briefing"))
+
+        from services.competition_service import get_competition_status
+        comp = get_competition_status()
+        if comp["status"] == "LOBBY":
+            return redirect(url_for("game.lobby"))
+
+        team_id = team.id
+        team_dict = team.to_dict()
+
+        # Update last viewed challenge
+        team.last_challenge_id = challenge_id
+        session["last_challenge_id"] = challenge_id
+
+    # Check unlock status
+    unlocked, reason, req_stars = is_challenge_unlocked(team_id, challenge_id)
+    if not unlocked:
+        worlds = get_worlds_with_status(team_id)
+        w_info = next((w for w in worlds if w["id"] == (5 if challenge_id == 12 else 1)), None)
+        return render_template("locked.html", team=team_dict, world=w_info, required=req_stars, reason=reason)
+
+    # Render Challenge 12 via 3-Stage Boss Arena
+    if challenge_id == 12:
+        boss_data = get_boss_status(team_id)
+        challenge = get_challenge_detail(challenge_id, team_id)
+        return render_template("boss.html", team=team_dict, challenge=challenge, boss_data=boss_data)
+
+    challenge = get_challenge_detail(challenge_id, team_id)
     if not challenge:
         return redirect(url_for("game.world_map"))
 
-    # Check if world is unlocked
-    worlds = get_worlds_with_status(team["id"])
-    world_dict = {w["id"]: w for w in worlds}
-    world_info = world_dict.get(challenge["world_id"])
-    if not world_info or not world_info["is_unlocked"]:
-        return render_template("locked.html", team=team, world=world_info, required=world_info["required_stars"] if world_info else 0)
+    return render_template("challenge.html", team=team_dict, challenge=challenge)
 
-    # Officially start competition timer when player enters challenge!
-    if team.get("started_at") is None:
-        start_team_timer(team["id"])
-        team = get_team_by_id(team["id"])
-
-    # Record active position so players can resume where they stopped
-    update_team_last_challenge(team["id"], challenge_id)
-    session["last_challenge_id"] = challenge_id
-
-    # If it's Challenge 12 (Boss challenge), render boss interface
-    if challenge["slug"] == "w5-c1" or challenge["interactive_type"] == "boss_terminal":
-        return render_template("boss.html", team=team, challenge=challenge)
-
-    return render_template("challenge.html", team=team, challenge=challenge)
 
 @challenges_bp.route("/boss")
 def view_boss():
     return redirect(url_for("challenges.view_challenge", challenge_id=12))
 
+
+# ==========================================
+# FLAG SUBMISSION & HINT APIS
+# ==========================================
 @challenges_bp.route("/api/submit-flag", methods=["POST"])
-def submit_flag():
-    team = get_current_team()
-    data = request.get_json() or {}
+def api_submit_flag():
+    if not validate_csrf(request):
+        return jsonify({"success": False, "message": "Invalid or missing CSRF security token."}), 403
+
+    from services.competition_service import get_competition_status
+    comp = get_competition_status()
+    if comp["status"] != "ACTIVE":
+        return jsonify({"success": False, "message": "Competition is currently not active. Stand by for Host launch!"}), 403
+
+    team_id = get_current_team_id()
+    if not team_id:
+        return jsonify({"success": False, "message": "Squad session missing. Please register or join your squad."}), 401
+
+    data = request.get_json(silent=True) or {}
     challenge_id = data.get("challenge_id")
     flag = data.get("flag", "").strip()
 
     if not challenge_id or not flag:
-        return jsonify({"success": False, "message": "Challenge ID and Flag are required"}), 400
+        return jsonify({"success": False, "message": "Challenge ID and Flag are required."}), 400
 
-    result = verify_and_solve_flag(team["id"], int(challenge_id), flag)
-    # Refresh updated team info
-    updated_team = get_team_by_id(team["id"])
+    ip = get_client_ip(request)
 
-    if result.get("success"):
-        c_id = int(challenge_id)
-        if c_id < 12:
-            next_id = c_id + 1
-            update_team_last_challenge(team["id"], next_id)
-            session["last_challenge_id"] = next_id
-        else:
-            update_team_last_challenge(team["id"], 12)
-            session["last_challenge_id"] = 12
+    # If submitting Case 12 directly, route through Boss Stage 3 validation
+    if int(challenge_id) == 12:
+        res = submit_stage3_final_flag(team_id, flag, ip=ip)
+        return jsonify(res)
 
-    # If completed boss or reached 12 stars, officially stop/freeze the CTF timer!
-    if result.get("success") and (int(challenge_id) == 12 or updated_team["stars"] >= 12):
-        finish_team_timer(team["id"])
-        updated_team = get_team_by_id(team["id"])
+    res = verify_and_solve_flag(team_id, int(challenge_id), flag, ip=ip)
+    return jsonify(res)
 
-    result["team"] = {
-        "score": updated_team["score"],
-        "coins": updated_team["coins"],
-        "stars": updated_team["stars"],
-        "current_world": updated_team["current_world"],
-        "started_at": updated_team.get("started_at"),
-        "finished_at": updated_team.get("finished_at"),
-        "total_time": updated_team.get("total_time")
-    }
-    return jsonify(result)
 
 @challenges_bp.route("/api/unlock-hint", methods=["POST"])
 def api_unlock_hint():
-    team = get_current_team()
-    data = request.get_json() or {}
+    if not validate_csrf(request):
+        return jsonify({"success": False, "message": "Invalid or missing CSRF security token."}), 403
+
+    team_id = get_current_team_id()
+    data = request.get_json(silent=True) or {}
     challenge_id = data.get("challenge_id")
     hint_num = data.get("hint_num")
 
     if not challenge_id or not hint_num:
-        return jsonify({"success": False, "message": "Invalid request"}), 400
+        return jsonify({"success": False, "message": "Invalid hint request."}), 400
 
-    result = unlock_hint(team["id"], int(challenge_id), int(hint_num))
-    updated_team = get_team_by_id(team["id"])
-    result["remaining_coins"] = updated_team["coins"]
-    return jsonify(result)
+    ip = get_client_ip(request)
+    res = unlock_hint(team_id, int(challenge_id), int(hint_num), ip=ip)
+    return jsonify(res)
+
+
+# ==========================================
+# THREE-STAGE BOSS APIS (CASE 12)
+# ==========================================
+@challenges_bp.route("/api/boss/status")
+def api_boss_status():
+    team_id = get_current_team_id()
+    res = get_boss_status(team_id)
+    return jsonify(res)
+
+
+@challenges_bp.route("/api/boss/override-shield", methods=["POST"])
+def api_boss_override_shield():
+    """Stage 1: Sector Keycode Override."""
+    if not validate_csrf(request):
+        return jsonify({"success": False, "message": "Invalid or missing CSRF token."}), 403
+
+    team_id = get_current_team_id()
+    data = request.get_json(silent=True) or {}
+    shield_num = int(data.get("shield_num", 0))
+    keycode = str(data.get("keycode", "")).strip()
+    ip = get_client_ip(request)
+
+    res = submit_stage1_shield(team_id, shield_num, keycode, ip=ip)
+    return jsonify(res)
+
+
+@challenges_bp.route("/api/boss/submit-trivia", methods=["POST"])
+def api_boss_submit_trivia():
+    """Stage 2: Cybersecurity Core Knowledge Check."""
+    if not validate_csrf(request):
+        return jsonify({"success": False, "message": "Invalid or missing CSRF token."}), 403
+
+    team_id = get_current_team_id()
+    data = request.get_json(silent=True) or {}
+    q_num = int(data.get("q_num", 0))
+    answer = str(data.get("answer", "")).strip()
+    ip = get_client_ip(request)
+
+    res = submit_stage2_trivia(team_id, q_num, answer, ip=ip)
+    return jsonify(res)
+
+
+@challenges_bp.route("/api/boss/submit-final-flag", methods=["POST"])
+def api_boss_submit_final_flag():
+    """Stage 3: Core Flag Extraction."""
+    if not validate_csrf(request):
+        return jsonify({"success": False, "message": "Invalid or missing CSRF token."}), 403
+
+    team_id = get_current_team_id()
+    data = request.get_json(silent=True) or {}
+    flag = str(data.get("flag", "")).strip()
+    ip = get_client_ip(request)
+
+    res = submit_stage3_final_flag(team_id, flag, ip=ip)
+    return jsonify(res)
+
 
 @challenges_bp.route("/api/world/<int:world_id>/challenges")
 def api_world_challenges(world_id: int):
-    team = get_current_team()
-    challenges = get_challenges_by_world(world_id, team["id"])
+    team_id = get_current_team_id()
+    challenges = get_challenges_by_world(world_id, team_id)
     return jsonify(challenges)

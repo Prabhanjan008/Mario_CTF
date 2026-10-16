@@ -1,150 +1,180 @@
-// Mario: The Cyber Heist - Universal Live HUD Timer & Intelligent Timestamps
+// Mario: The Cyber Heist - High-Precision Authoritative Timer & Timestamp Engine
+// Immune to Client Clock Skew, Timezone Offsets (IST/UTC), and Background Tab Throttling
 
 (function () {
-    // 1. Live HUD Competition Timer
+    'use strict';
+
+    function formatDuration(totalSecs) {
+        if (isNaN(totalSecs) || totalSecs < 0) totalSecs = 0;
+        const hrs = String(Math.floor(totalSecs / 3600)).padStart(2, '0');
+        const mins = String(Math.floor((totalSecs % 3600) / 60)).padStart(2, '0');
+        const secs = String(totalSecs % 60).padStart(2, '0');
+        return `${hrs}:${mins}:${secs}`;
+    }
+
+    function parseUtcDate(raw) {
+        if (!raw) return null;
+        let s = String(raw).trim();
+        if (!s) return null;
+        s = s.replace(' ', 'T');
+        // Ensure UTC interpretation if timezone offset is absent
+        if (!s.endsWith('Z') && !/[+-]\d{2}(:\d{2})?$/.test(s)) {
+            s += 'Z';
+        }
+        const d = new Date(s);
+        return isNaN(d.getTime()) ? null : d;
+    }
+
     function initHudTimer() {
         const timerPill = document.getElementById('hud-timer-pill');
         const timerVal = document.getElementById('hud-timer-val');
+        if (!timerPill || !timerVal) return;
 
-        let rawStarted = timerPill ? timerPill.dataset.startedAt : '';
-        let rawFinished = timerPill ? timerPill.dataset.finishedAt : '';
-        let totalTime = timerPill ? timerPill.dataset.totalTime : '';
+        // Clean any obsolete sessionStorage relics from previous testing
+        try {
+            sessionStorage.removeItem('mario_ctf_start_time');
+            sessionStorage.removeItem('mario_ctf_end_time');
+            sessionStorage.removeItem('mario_ctf_total_time');
+        } catch (e) {}
 
-        // Check sessionStorage sync
-        if (!rawStarted && sessionStorage.getItem('mario_ctf_start_time')) {
-            rawStarted = sessionStorage.getItem('mario_ctf_start_time');
-        }
-        if (!rawFinished && sessionStorage.getItem('mario_ctf_end_time')) {
-            rawFinished = sessionStorage.getItem('mario_ctf_end_time');
-        }
-        if (!totalTime && sessionStorage.getItem('mario_ctf_total_time')) {
-            totalTime = sessionStorage.getItem('mario_ctf_total_time');
-        }
+        let runState = timerPill.dataset.runState || 'STANDBY';
+        let totalTime = timerPill.dataset.totalTime || '';
+        let baseElapsed = parseInt(timerPill.dataset.elapsedSeconds, 10);
+        if (isNaN(baseElapsed) || baseElapsed < 0) baseElapsed = 0;
 
-        let startTimestamp = null;
-        if (rawStarted) {
-            if (/^\d{4}-\d{2}-\d{2}/.test(rawStarted)) {
-                const d = new Date(rawStarted.replace(' ', 'T'));
-                startTimestamp = isNaN(d.getTime()) ? null : d.getTime();
-            } else {
-                const n = parseInt(rawStarted, 10);
-                if (!isNaN(n)) startTimestamp = n;
-            }
-        }
+        // Monotonic performance baseline (immune to OS clock tampering or drift)
+        let anchorPerf = performance.now();
+        let anchorElapsed = baseElapsed;
 
         let showClockMode = false;
 
-        if (timerPill) {
-            timerPill.addEventListener('click', () => {
-                if (rawFinished || totalTime) {
-                    window.location.href = '/end';
-                    return;
-                }
-                showClockMode = !showClockMode;
-                updateDisplay();
-                if (window.soundFx) window.soundFx.playCoin();
-            });
-        }
+        timerPill.addEventListener('click', () => {
+            if (runState === 'COMPLETED' || totalTime) {
+                window.location.href = '/end';
+                return;
+            }
+            showClockMode = !showClockMode;
+            renderTimer();
+            if (window.soundFx) window.soundFx.playCoin();
+        });
 
-        function updateDisplay() {
+        function renderTimer() {
             const now = new Date();
 
-            if (timerVal) {
-                if (showClockMode) {
-                    // Display Local 24h Clock
-                    const hrs = String(now.getHours()).padStart(2, '0');
-                    const mins = String(now.getMinutes()).padStart(2, '0');
-                    const secs = String(now.getSeconds()).padStart(2, '0');
-                    timerVal.innerText = `${hrs}:${mins}:${secs}`;
-                    if (timerPill) timerPill.title = "Local Clock (IST) • Click to toggle Mission Timer";
-                } else if (rawFinished || totalTime) {
-                    // STATE: Completed / Finished -> Frozen Elapsed Time!
-                    const displayTime = totalTime || "00:00:00";
-                    timerVal.innerHTML = `<span style="color: var(--cyber-gold); font-weight: bold;">🏆 ${displayTime}</span>`;
-                    if (timerPill) {
-                        timerPill.style.borderColor = "var(--cyber-gold)";
-                        timerPill.style.boxShadow = "0 0 10px rgba(255, 215, 0, 0.4)";
-                        timerPill.title = `CTF Investigation Completed! Locked Final Time: ${displayTime}`;
-                    }
-                } else if (!startTimestamp) {
-                    // STATE: Not started yet / Standby!
-                    timerVal.innerHTML = `<span style="color: #8da4d0;">00:00:00</span> <span style="font-size: 0.65rem; color: var(--cyber-cyan); border: 1px solid var(--cyber-cyan); border-radius: 3px; padding: 1px 3px; margin-left: 2px;">READY</span>`;
-                    if (timerPill) {
-                        timerPill.title = "CTF Timer on Standby • Starts automatically when entering World 1 investigation!";
-                    }
-                } else {
-                    // STATE: Active investigation running!
-                    const elapsedMs = Math.max(0, Date.now() - startTimestamp);
-                    const totalSecs = Math.floor(elapsedMs / 1000);
-                    const hrs = String(Math.floor(totalSecs / 3600)).padStart(2, '0');
-                    const mins = String(Math.floor((totalSecs % 3600) / 60)).padStart(2, '0');
-                    const secs = String(totalSecs % 60).padStart(2, '0');
-                    timerVal.innerText = `${hrs}:${mins}:${secs}`;
-                    if (timerPill) {
-                        timerPill.style.borderColor = "var(--cyber-cyan)";
-                        timerPill.title = `CTF Mission Active (${hrs}:${mins}:${secs}) • Click to toggle Local Clock`;
-                    }
-                }
+            if (showClockMode) {
+                // Local Clock Mode (24-hour)
+                const hrs = String(now.getHours()).padStart(2, '0');
+                const mins = String(now.getMinutes()).padStart(2, '0');
+                const secs = String(now.getSeconds()).padStart(2, '0');
+                timerVal.innerText = `${hrs}:${mins}:${secs}`;
+                timerPill.title = "Local Device Clock • Click to return to Mission Timer";
+                return;
             }
 
-            // Sync with Admin Dashboard Live Clock widgets if present
+            if (runState === 'COMPLETED' || totalTime) {
+                const display = totalTime || formatDuration(anchorElapsed);
+                timerVal.innerHTML = `<span style="color: var(--cyber-gold); font-weight: bold;">🏆 ${display}</span>`;
+                timerPill.style.borderColor = "var(--cyber-gold)";
+                timerPill.style.boxShadow = "0 0 12px rgba(255, 215, 0, 0.4)";
+                timerPill.title = `Investigation Concluded! Locked Time: ${display}`;
+            } else if (runState === 'STANDBY' || (anchorElapsed === 0 && !timerPill.dataset.startedAt)) {
+                timerVal.innerHTML = `<span style="color: #8da4d0;">00:00:00</span> <span style="font-size: 0.65rem; color: var(--cyber-cyan); border: 1px solid var(--cyber-cyan); border-radius: 3px; padding: 1px 4px; margin-left: 2px;">READY</span>`;
+                timerPill.style.borderColor = "rgba(0, 240, 255, 0.3)";
+                timerPill.title = "CTF Mission Clock on Standby • Awaiting Host Mission Dispatch";
+            } else {
+                // ACTIVE Run: High-precision monotonic elapsed progression
+                const elapsedDeltaSec = Math.floor((performance.now() - anchorPerf) / 1000);
+                const currentSecs = Math.max(0, anchorElapsed + elapsedDeltaSec);
+                const formatted = formatDuration(currentSecs);
+                timerVal.innerText = formatted;
+                timerPill.style.borderColor = "var(--cyber-cyan)";
+                timerPill.title = `CTF Mission Active (${formatted}) • Click to toggle Local Clock`;
+
+                // Update modal timer if open
+                const modalTimer = document.getElementById('modal-timer-val');
+                if (modalTimer) modalTimer.innerText = formatted;
+            }
+
+            // Sync with Admin Dashboard Live Widgets
             const adminClock = document.getElementById('admin-live-clock');
             const adminTimer = document.getElementById('admin-live-timer');
             if (adminClock) {
                 adminClock.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
             }
             if (adminTimer) {
-                if (rawFinished || totalTime) {
-                    adminTimer.innerText = `COMPLETED: ${totalTime || 'DONE'}`;
+                if (runState === 'COMPLETED' || totalTime) {
+                    adminTimer.innerText = `COMPLETED: ${totalTime || formatDuration(anchorElapsed)}`;
                     adminTimer.style.color = "var(--cyber-gold)";
-                } else if (!startTimestamp) {
-                    adminTimer.innerText = "STATUS: STANDBY (NOT STARTED)";
+                } else if (runState === 'STANDBY') {
+                    adminTimer.innerText = "STATUS: STANDBY (AWAITING DISPATCH)";
                     adminTimer.style.color = "#8da4d0";
                 } else {
-                    const elapsedMs = Math.max(0, Date.now() - startTimestamp);
-                    const totalSecs = Math.floor(elapsedMs / 1000);
-                    const hrs = String(Math.floor(totalSecs / 3600)).padStart(2, '0');
-                    const mins = String(Math.floor((totalSecs % 3600) / 60)).padStart(2, '0');
-                    const secs = String(totalSecs % 60).padStart(2, '0');
-                    adminTimer.innerText = `ACTIVE RUNTIME: ${hrs}:${mins}:${secs}`;
+                    const elapsedDeltaSec = Math.floor((performance.now() - anchorPerf) / 1000);
+                    const currentSecs = Math.max(0, anchorElapsed + elapsedDeltaSec);
+                    adminTimer.innerText = `ACTIVE RUNTIME: ${formatDuration(currentSecs)}`;
                     adminTimer.style.color = "var(--cyber-cyan)";
                 }
             }
         }
 
-        updateDisplay();
-        setInterval(updateDisplay, 1000);
+        renderTimer();
+        setInterval(renderTimer, 500); // 500ms heartbeat for sub-second smooth ticking
 
-        // Global exposed helper methods
-        window.startCtfTimer = function (ts) {
-            startTimestamp = ts || Date.now();
-            sessionStorage.setItem('mario_ctf_start_time', startTimestamp);
-            updateDisplay();
+        // Resync with server telemetry periodically and when student returns to tab
+        async function syncWithServer() {
+            try {
+                const res = await fetch('/api/competition/status', { credentials: 'same-origin' });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.team && data.team.run_info) {
+                    const info = data.team.run_info;
+                    runState = info.run_state || runState;
+                    totalTime = info.total_time || totalTime;
+                    anchorElapsed = info.elapsed_seconds || 0;
+                    anchorPerf = performance.now();
+                    renderTimer();
+                } else if (data.status === 'LOBBY') {
+                    runState = 'STANDBY';
+                    anchorElapsed = 0;
+                    anchorPerf = performance.now();
+                    renderTimer();
+                }
+            } catch (e) {
+                // Silent network resilience
+            }
+        }
+
+        // Re-sync on tab focus and every 25 seconds
+        window.addEventListener('focus', syncWithServer);
+        setInterval(syncWithServer, 25000);
+
+        // Global API methods for challenge workflows
+        window.startCtfTimer = function () {
+            runState = 'ACTIVE';
+            anchorElapsed = 0;
+            anchorPerf = performance.now();
+            renderTimer();
+            syncWithServer();
         };
 
         window.finishCtfTimer = function (timeStr) {
-            totalTime = timeStr || "00:00:00";
-            rawFinished = new Date().toISOString();
-            sessionStorage.setItem('mario_ctf_end_time', rawFinished);
-            sessionStorage.setItem('mario_ctf_total_time', totalTime);
-            updateDisplay();
+            runState = 'COMPLETED';
+            totalTime = timeStr || formatDuration(anchorElapsed);
+            renderTimer();
         };
 
         window.resetCtfTimer = function () {
-            startTimestamp = null;
-            rawFinished = '';
+            runState = 'STANDBY';
+            anchorElapsed = 0;
             totalTime = '';
-            sessionStorage.removeItem('mario_ctf_start_time');
-            sessionStorage.removeItem('mario_ctf_end_time');
-            sessionStorage.removeItem('mario_ctf_total_time');
-            updateDisplay();
+            renderTimer();
         };
     }
 
-    // 2. Relative time calculator
-    function getRelativeTime(timestampDate) {
-        const now = new Date();
-        const diffMs = now.getTime() - timestampDate.getTime();
+    // Relative Time Formatter
+    function getRelativeTime(dateObj) {
+        const now = Date.now();
+        const diffMs = Math.max(0, now - dateObj.getTime());
         const diffSecs = Math.floor(diffMs / 1000);
 
         if (diffSecs < 5) return "Just now";
@@ -157,46 +187,15 @@
         return `${diffDays}d ago`;
     }
 
-    // 3. Intelligent Timestamp Formatter
-    function parseDate(raw) {
-        if (!raw) return null;
-        let str = String(raw).trim();
-        if (!str) return null;
-
-        // Check if string matches "YYYY-MM-DD HH:MM:SS"
-        if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(str)) {
-            // Check if this was recorded in UTC by checking if it's in the past
-            // If parsed as UTC vs Local:
-            const asLocal = new Date(str.replace(' ', 'T'));
-            const asUtc = new Date(str.replace(' ', 'T') + 'Z');
-
-            const now = Date.now();
-            // If asLocal is in the future compared to now, or asUtc is closer to reasonable time
-            const diffLocal = Math.abs(now - asLocal.getTime());
-            const diffUtc = Math.abs(now - asUtc.getTime());
-
-            // If UTC difference is much smaller (within 24 hours) and local is > 4 hours ahead or in future
-            if (diffUtc < diffLocal && asLocal.getTime() > now) {
-                return asUtc;
-            }
-            return asLocal;
-        }
-
-        const d = new Date(str);
-        return isNaN(d.getTime()) ? null : d;
-    }
-
+    // Format all .live-timestamp nodes
     function formatAllTimestamps() {
         const elements = document.querySelectorAll('.live-timestamp');
         elements.forEach(el => {
             const raw = el.dataset.timestamp || el.getAttribute('data-time') || el.innerText;
-            const date = parseDate(raw);
+            const date = parseUtcDate(raw);
             if (!date) return;
 
-            // Preserve original in data attribute
-            if (!el.dataset.timestamp) {
-                el.dataset.timestamp = raw;
-            }
+            if (!el.dataset.timestamp) el.dataset.timestamp = raw;
 
             const hours = String(date.getHours()).padStart(2, '0');
             const mins = String(date.getMinutes()).padStart(2, '0');
@@ -214,14 +213,13 @@
                 <span style="color: #fff; font-family: monospace; font-size: 0.85rem;">${dateStr} ${timeStr}</span>
                 <span class="badge-tag badge-category" style="font-size: 0.7rem; margin-left: 6px; padding: 2px 6px;">${rel}</span>
             `;
-            el.title = `Local Time: ${date.toLocaleString()} (Relative: ${rel})`;
+            el.title = `Local Time: ${date.toLocaleString()} (${rel})`;
         });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
         initHudTimer();
         formatAllTimestamps();
-        // Update relative time badges every 5 seconds
         setInterval(formatAllTimestamps, 5000);
     });
 })();

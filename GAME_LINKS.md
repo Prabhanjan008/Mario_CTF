@@ -5,41 +5,53 @@
 
 ---
 
+## 🎮 LIVE TOURNAMENT FLOW (HOW IT WORKS ON GAME DAY)
+
+1. **Host Publishes the Link:** Share `http://192.168.100.7:5000/` (or localhost for testing) with all participating students.
+2. **Students Register Squads:** Students click *"Register Squad"* at `/briefing`, enter their Squad Name and Lead Handle, and receive their unique Crockford Base32 Access Code (e.g. `OJAS-K7M9P2X4`).
+3. **Teammates Join:** Teammates enter that Access Code on their laptops/phones to join the same squad.
+4. **Pre-Game Standby Lobby (`/lobby`):** All students gather in the live Mario Mission Radar Waiting Room. Screen displays registered squad members, live count of connected squads, and polls for Host Launch.
+5. **Host Launches the Game (`/admin`):** The Host logs in at `/admin` using Host Passkey (`OJAS-HOST-ALPHA-7701`), sees all connected squads, and clicks **`[ 🚀 START GAME FOR ALL SQUADS ]`**.
+6. **Instant Auto-Warp:** The instant the host starts the game, all students' screens play a retro Mario level-start chime and automatically warp directly into the **3D Cyber World Map (`/map`)** to begin solving!
+
+---
+
 ## 🌐 1. MAIN GAME NAVIGATION LINKS
 
 ### On the Host Laptop (Localhost):
-* 🚨 **Game Title Screen & 3D Intro:** [http://127.0.0.1:5000/](http://127.0.0.1:5000/)  
-  *(Also works as [http://localhost:5000/](http://localhost:5000/))*
-* 📋 **Squad Registration & Dispatch:** [http://127.0.0.1:5000/briefing](http://127.0.0.1:5000/briefing)  
-  *(Register new team, get Access Code, switch active squads)*
+* 📋 **Squad Registration & Join:** [http://127.0.0.1:5000/briefing](http://127.0.0.1:5000/briefing)  
+  *(Students enter squad name or access code to join)*
+* 🛰️ **Pre-Game Standby Lobby:** [http://127.0.0.1:5000/lobby](http://127.0.0.1:5000/lobby)  
+  *(Live waiting room radar with auto-warp when host starts game)*
 * 🗺️ **3D Interactive World Map:** [http://127.0.0.1:5000/map](http://127.0.0.1:5000/map)  
-  *(Navigate Detective Mario across 5 cyber sectors)*
+  *(Unlocks automatically when host dispatches the mission)*
 * 🏆 **Live Competition Leaderboard:** [http://127.0.0.1:5000/leaderboard](http://127.0.0.1:5000/leaderboard)  
-  *(Real-time scores, solve times, and organizer reset button)*
+  *(Real-time scores, star rankings, solve times)*
 * 🏁 **Mission Debrief & Official End Screen:** [http://127.0.0.1:5000/end](http://127.0.0.1:5000/end)  
-  *(Concluded run telemetry, locked timer, and 12-case audit stream)*
 * 👑 **Victory Ceremony (Post-Boss):** [http://127.0.0.1:5000/victory](http://127.0.0.1:5000/victory)  
-  *(Unlocked after solving Case 12)*
 
 ---
 
 ### For Other Laptops / Devices (Connected to Same Wi-Fi / LAN):
-Share this IP link with participants in the lab or hall:
+Share this link on the projector or lab boards:
 
-* 🚨 **Player Start Screen:** `http://192.168.100.7:5000/`
-* 📋 **Squad Registration:** `http://192.168.100.7:5000/briefing`
-* 🗺️ **3D World Map:** `http://192.168.100.7:5000/map`
-* 🏆 **Live Leaderboard:** `http://192.168.100.7:5000/leaderboard`
-* 🏁 **Mission Debrief:** `http://192.168.100.7:5000/end`
-
-*(Note: If participants cannot connect across the college Wi-Fi, ensure Windows Defender Firewall allows inbound connections on port 5000).*
+* 📋 **Student Registration & Lobby:** `http://192.168.100.7:5000/`
+* 🛰️ **Waiting Room:** `http://192.168.100.7:5000/lobby`
+* 🏆 **Public Live Leaderboard:** `http://192.168.100.7:5000/leaderboard`
 
 ---
 
-## 👑 2. RESTRICTED HOST & ORGANIZER PORTAL (CONFIDENTIAL)
+## 👑 2. RESTRICTED HOST & ORGANIZER CONTROL DECK (CONFIDENTIAL)
 
-* 🔐 **Host Admin Dashboard:** [http://127.0.0.1:5000/admin](http://127.0.0.1:5000/admin)  
+* 🔐 **Host Admin Portal:** [http://127.0.0.1:5000/admin](http://127.0.0.1:5000/admin)  
   *(LAN Link: `http://192.168.100.7:5000/admin`)*
+
+### Host Actions in the Admin Dashboard:
+* **`[ 🚀 START GAME FOR ALL SQUADS ]`**: Dispatches the competition, starts all squad timers, and auto-warps all students into the game.
+* **`[ ⏸️ PAUSE / RESUME ]`**: Temporarily halts submissions and timers.
+* **`[ 🏁 CONCLUDE ]`**: Stops submissions and freezes final official podium.
+* **`[ 🧹 PURGE TEST SQUADS (CLEAN LOBBY) ]`**: Resets the entire database to a clean, 0-squad lobby ready for students.
+* **`[ 📢 BROADCAST ]`**: Sends real-time announcements directly to all students' HUDs.
 
 ### Secret Host Authentication Keys:
 | Priority | Key Role | Secret Passkey |

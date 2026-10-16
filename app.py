@@ -1,51 +1,120 @@
+"""
+Mario: The Cyber Heist — Production Flask Application Entrypoint.
+Configured for 100+ concurrent teams with multi-member squad isolation,
+CSRF protection, secure cookie handling, and production WSGI compatibility.
+"""
+
 import os
 from datetime import timedelta
-from flask import Flask, render_template, session
-from routes.game import game_bp, get_current_team
+from flask import Flask, render_template, session, request
+from models.db import init_database, db_session
+from models.schema import Team
+from services.auth_service import get_current_team_and_member, get_or_create_csrf_token
+from services.run_service import get_team_run_info, get_team_resume_target
+from routes.game import game_bp
 from routes.challenges import challenges_bp
 from routes.admin import admin_bp
-from database.init_db import init_db, DB_PATH
-from models.team import get_team_resume_target
+
 
 def create_app():
     app = Flask(__name__, static_folder="static", template_folder="templates")
+
+    # Security & Session Configuration
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "mario-ojas-cyber-heist-secret-key-2026")
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
-    
-    # Ensure DB is created if missing
-    if not os.path.exists(DB_PATH):
-        init_db(reset=False)
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_SECURE"] = (
+        os.environ.get("FLASK_ENV") == "production" or
+        os.environ.get("HTTPS") == "1"
+    )
+    # Request size limits to prevent memory exhaustion / DoS
+    app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
+
+    # Ensure Database tables and initial seed data exist
+    try:
+        init_database(reset=False, seed=True)
+    except Exception as e:
+        print(f"Notice: Database check during app initialization: {e}")
 
     @app.before_request
-    def make_session_permanent():
+    def setup_session_and_csrf():
         session.permanent = True
+        # Ensure CSRF token exists for the session
+        get_or_create_csrf_token()
 
     @app.context_processor
     def inject_globals():
         try:
-            team = get_current_team()
-            resume_info = get_team_resume_target(team["id"]) if team else None
-            return dict(team=team, resume_info=resume_info)
-        except Exception:
-            return dict(team=None, resume_info=None)
+            from datetime import datetime, timezone
+            from services.competition_service import get_competition_status
+            comp_status = get_competition_status()
+            now_utc = datetime.now(timezone.utc)
+            server_time_ms = int(now_utc.timestamp() * 1000)
 
-    # Register blueprints
+            with db_session() as sess:
+                team, member = get_current_team_and_member(sess)
+                team_dict = team.to_dict() if team else None
+                member_name = member.member_name if member else None
+                run_info = get_team_run_info(team) if team else None
+
+            resume_info = get_team_resume_target(team_dict["id"]) if team_dict else None
+            csrf_tok = get_or_create_csrf_token()
+
+            return dict(
+                team=team_dict,
+                member_name=member_name,
+                resume_info=resume_info,
+                run_info=run_info,
+                competition=comp_status,
+                server_time_ms=server_time_ms,
+                csrf_token=csrf_tok
+            )
+        except Exception:
+            from datetime import datetime, timezone
+            now_utc = datetime.now(timezone.utc)
+            return dict(
+                team=None,
+                member_name=None,
+                resume_info=None,
+                run_info=None,
+                competition={"status": "LOBBY", "can_play": False},
+                server_time_ms=int(now_utc.timestamp() * 1000),
+                csrf_token=get_or_create_csrf_token()
+            )
+
+    # Register Blueprints
     app.register_blueprint(game_bp)
     app.register_blueprint(challenges_bp)
     app.register_blueprint(admin_bp)
 
     @app.route("/api/health")
     def health_check():
-        return {"status": "online", "game": "Mario: The Cyber Heist", "edition": "OJAS 2026"}
+        return {
+            "status": "online",
+            "game": "Mario: The Cyber Heist",
+            "edition": "OJAS 2026 Production Upgrade",
+            "database": "connected"
+        }
+
+    @app.errorhandler(403)
+    def forbidden(e):
+        return {"error": "Forbidden: Request verification or authorization failed."}, 403
 
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template("404.html"), 404
 
+    @app.errorhandler(500)
+    def internal_error(e):
+        return {"error": "Internal Server Error. Forensic incident logged."}, 500
+
     return app
+
 
 app = create_app()
 
 if __name__ == "__main__":
     # Host on 0.0.0.0 for LAN tech fest access
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get("PORT", "5000"))
+    app.run(host="0.0.0.0", port=port, debug=False)

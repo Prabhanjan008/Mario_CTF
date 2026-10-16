@@ -28,7 +28,10 @@ function initFlagSubmission() {
         try {
             const resp = await fetch('/api/submit-flag', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': (window.getCsrfToken ? window.getCsrfToken() : '')
+                },
                 body: JSON.stringify({ challenge_id: challengeId, flag: flag })
             });
             const data = await resp.json();
@@ -137,7 +140,10 @@ function initHintButtons() {
             try {
                 const resp = await fetch('/api/unlock-hint', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': (window.getCsrfToken ? window.getCsrfToken() : '')
+                    },
                     body: JSON.stringify({ challenge_id: challengeId, hint_num: hintNum })
                 });
                 const data = await resp.json();
@@ -312,61 +318,76 @@ function initChallengeTools() {
         });
     }
 
-    // 8. Boss Terminal Overrides (World 5)
+    // 8. Boss Terminal Overrides (World 5: 3-Stage Showdown)
     initBossOverrides();
+    initBossTrivia();
 }
 
 function initBossOverrides() {
-    const codes = {
-        1: ["SECRET"],
-        2: ["PINES", "PINE"],
-        3: ["BOO", "KING BOO", "KINGBOO"],
-        4: ["INSIDER"]
-    };
-
     for (let i = 1; i <= 4; i++) {
         const btn = document.getElementById(`boss-override-btn-${i}`);
         const input = document.getElementById(`boss-override-input-${i}`);
         const status = document.getElementById(`boss-override-status-${i}`);
 
         if (btn && input) {
-            const handleCrack = () => {
+            const handleCrack = async () => {
                 if (btn.disabled) return;
-                const val = input.value.trim().toUpperCase();
+                const val = input.value.trim();
+                if (!val) return;
 
-                if (codes[i].includes(val)) {
-                    if (status) {
-                        status.className = "badge-tag badge-diff-easy";
-                        status.innerHTML = `NEUTRALIZED ✅`;
+                btn.disabled = true;
+                btn.innerText = "VERIFYING...";
+
+                try {
+                    const res = await fetch('/api/boss/override-shield', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': (window.getCsrfToken ? window.getCsrfToken() : '')
+                        },
+                        body: JSON.stringify({ shield_num: i, keycode: val })
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        if (status) {
+                            status.className = "badge-tag badge-diff-easy";
+                            status.innerHTML = "NEUTRALIZED ✅";
+                        }
+                        btn.disabled = true;
+                        btn.innerText = "CRACKED";
+                        input.disabled = true;
+
+                        if (window.bossSceneInstance) {
+                            window.bossSceneInstance.breakShield(i - 1);
+                        }
+                        if (window.soundFx) window.soundFx.playPowerup();
+
+                        if (data.stage1_complete) {
+                            unlockBossStage2();
+                        }
+                    } else {
+                        btn.disabled = false;
+                        btn.innerText = "CRACK ⚡";
+                        if (status) {
+                            status.className = "badge-tag badge-diff-hard";
+                            status.innerHTML = "FAILED ❌";
+                        }
+                        if (window.soundFx) window.soundFx.playError();
+                        setTimeout(() => {
+                            if (!btn.disabled && status) {
+                                status.className = "badge-tag badge-diff-hard";
+                                status.innerHTML = "ACTIVE 🔒";
+                            }
+                        }, 2500);
                     }
-                    btn.disabled = true;
-                    btn.innerText = "CRACKED";
-                    input.disabled = true;
-
-                    // Trigger 3D Shield break in WebGL
-                    if (window.bossSceneInstance) {
-                        window.bossSceneInstance.breakShield(i - 1);
-                    }
-
-                    checkAllBossShields();
-                } else {
+                } catch (e) {
+                    btn.disabled = false;
+                    btn.innerText = "CRACK ⚡";
                     if (status) {
                         status.className = "badge-tag badge-diff-hard";
-                        status.innerHTML = `FAILED ❌`;
+                        status.innerHTML = "ERROR ⚠️";
                     }
-                    if (window.soundFx) window.soundFx.playError();
-                    setTimeout(() => {
-                        if (!btn.disabled && status) {
-                            const badgeClasses = {
-                                1: "badge-tag badge-diff-easy",
-                                2: "badge-tag badge-category",
-                                3: "badge-tag badge-diff-expert",
-                                4: "badge-tag badge-diff-hard"
-                            };
-                            status.className = badgeClasses[i];
-                            status.innerHTML = "ACTIVE 🔒";
-                        }
-                    }, 2500);
                 }
             };
 
@@ -381,39 +402,155 @@ function initBossOverrides() {
     }
 }
 
-function checkAllBossShields() {
-    let allSolved = true;
-    for (let i = 1; i <= 4; i++) {
-        const btn = document.getElementById(`boss-override-btn-${i}`);
-        if (btn && !btn.disabled) {
-            allSolved = false;
-            break;
-        }
+function unlockBossStage2() {
+    const s1Pill = document.getElementById('stage1-progress-pill');
+    const s2Pill = document.getElementById('stage2-progress-pill');
+    const s1Ind = document.getElementById('stage-indicator-1');
+    const s2Ind = document.getElementById('stage-indicator-2');
+    const s2Card = document.getElementById('boss-stage-2-card');
+
+    if (s1Pill) {
+        s1Pill.className = "badge-tag badge-diff-easy";
+        s1Pill.innerText = "STAGE 1 COMPLETE (4/4 SHIELDS)";
+    }
+    if (s1Ind) {
+        s1Ind.className = "badge-tag badge-diff-easy";
+        s1Ind.innerText = "STAGE 1: SHIELDS CLEARED";
+    }
+    if (s2Pill) {
+        s2Pill.className = "badge-tag badge-category";
+        s2Pill.innerText = "STAGE 2 ACTIVE // ANSWER ALL 4 QUESTIONS";
+    }
+    if (s2Ind) {
+        s2Ind.className = "badge-tag badge-category";
+    }
+    if (s2Card) {
+        s2Card.style.opacity = "1";
     }
 
-    if (allSolved) {
-        // Show synthesized Master Flag box
-        const finalBox = document.getElementById('boss-final-flag-box');
-        if (finalBox) {
-            finalBox.classList.remove('hidden');
+    for (let q = 1; q <= 4; q++) {
+        const inp = document.getElementById(`boss-trivia-input-${q}`);
+        const btn = document.getElementById(`boss-trivia-btn-${q}`);
+        const stat = document.getElementById(`boss-trivia-status-${q}`);
+        if (inp && btn && (!stat || !stat.innerText.includes('VERIFIED'))) {
+            inp.disabled = false;
+            btn.disabled = false;
         }
+    }
+}
 
-        // Automatically populate master flag into the submission terminal!
-        const flagInput = document.getElementById('flag-input');
-        if (flagInput) {
-            flagInput.value = "FLAG{GOLDEN_STAR_RESTORED_OJAS_CHAMPION}";
-            flagInput.focus();
-        }
+function initBossTrivia() {
+    for (let q = 1; q <= 4; q++) {
+        const btn = document.getElementById(`boss-trivia-btn-${q}`);
+        const input = document.getElementById(`boss-trivia-input-${q}`);
+        const status = document.getElementById(`boss-trivia-status-${q}`);
 
-        // Scroll smoothly to submit button so player can submit with 1 click
-        const submitBtn = document.getElementById('flag-submit-btn');
-        if (submitBtn) {
-            submitBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        if (btn && input) {
+            const handleVerify = async () => {
+                if (btn.disabled) return;
+                const val = input.value.trim();
+                if (!val) return;
 
-        if (window.soundFx) {
-            window.soundFx.playPowerup();
+                btn.disabled = true;
+                btn.innerText = "CHECKING...";
+
+                try {
+                    const res = await fetch('/api/boss/submit-trivia', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': (window.getCsrfToken ? window.getCsrfToken() : '')
+                        },
+                        body: JSON.stringify({ q_num: q, answer: val })
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        if (status) {
+                            status.className = "badge-tag badge-diff-easy";
+                            status.innerHTML = "VERIFIED ✅";
+                        }
+                        btn.disabled = true;
+                        btn.innerText = "VERIFIED";
+                        input.disabled = true;
+
+                        if (window.soundFx) window.soundFx.playPowerup();
+
+                        if (data.stage2_complete) {
+                            unlockBossStage3();
+                        }
+                    } else {
+                        btn.disabled = false;
+                        btn.innerText = "VERIFY 🔍";
+                        if (status) {
+                            status.className = "badge-tag badge-diff-hard";
+                            status.innerHTML = "FAILED ❌";
+                        }
+                        if (window.soundFx) window.soundFx.playError();
+                        setTimeout(() => {
+                            if (!btn.disabled && status) {
+                                status.className = "badge-tag badge-diff-hard";
+                                status.innerHTML = "PENDING 🔒";
+                            }
+                        }, 2500);
+                    }
+                } catch (e) {
+                    btn.disabled = false;
+                    btn.innerText = "VERIFY 🔍";
+                    if (status) {
+                        status.className = "badge-tag badge-diff-hard";
+                        status.innerHTML = "ERROR ⚠️";
+                    }
+                }
+            };
+
+            btn.addEventListener('click', handleVerify);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleVerify();
+                }
+            });
         }
+    }
+}
+
+function unlockBossStage3() {
+    const s2Pill = document.getElementById('stage2-progress-pill');
+    const s3Pill = document.getElementById('stage3-progress-pill');
+    const s2Ind = document.getElementById('stage-indicator-2');
+    const s3Ind = document.getElementById('stage-indicator-3');
+    const s3Card = document.getElementById('boss-stage-3-card');
+    const flagInput = document.getElementById('flag-input');
+    const flagBtn = document.getElementById('flag-submit-btn');
+
+    if (s2Pill) {
+        s2Pill.className = "badge-tag badge-diff-easy";
+        s2Pill.innerText = "STAGE 2 COMPLETE (4/4 VERIFIED)";
+    }
+    if (s2Ind) {
+        s2Ind.className = "badge-tag badge-diff-easy";
+        s2Ind.innerText = "STAGE 2: TRIVIA CLEARED";
+    }
+    if (s3Pill) {
+        s3Pill.className = "badge-tag badge-category";
+        s3Pill.innerText = "VAULT CORE OPEN // READY FOR EXTRACTION";
+    }
+    if (s3Ind) {
+        s3Ind.className = "badge-tag badge-category";
+    }
+    if (s3Card) {
+        s3Card.style.opacity = "1";
+    }
+    if (flagInput) {
+        flagInput.disabled = false;
+        flagInput.focus();
+    }
+    if (flagBtn) {
+        flagBtn.disabled = false;
+    }
+    if (window.soundFx) {
+        window.soundFx.playVictory();
     }
 }
 

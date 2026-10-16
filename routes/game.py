@@ -1,216 +1,377 @@
+"""
+Game Session, Navigation & Team Controller (Thin Routes).
+Delegates all business logic to auth_service, run_service, progression_service, and leaderboard_service.
+"""
+
+from datetime import datetime, timezone
 from flask import Blueprint, render_template, session, redirect, url_for, request, jsonify
 from models.db import db_session
-from models.team import (
-    get_or_create_default_team,
-    get_team_by_id,
-    get_leaderboard,
-    register_team,
-    update_team_name,
-    get_team_by_code,
-    get_team_resume_target,
-    finish_team_timer,
-    reopen_team_mission
+from models.schema import Team, Challenge, SolvedChallenge
+from services.auth_service import (
+    register_team as svc_register_team,
+    join_team_by_code,
+    get_current_team_and_member,
+    get_client_ip,
+    validate_csrf
 )
-from models.challenge import get_worlds_with_status
+from services.run_service import (
+    start_team_run,
+    complete_team_run,
+    reopen_team_run,
+    get_team_run_info,
+    get_team_resume_target
+)
+from services.progression_service import (
+    get_worlds_with_status,
+    calculate_normal_stars
+)
+from services.leaderboard_service import get_leaderboard_standings
 
 game_bp = Blueprint("game", __name__)
 
+
 def get_current_team():
-    team_id = session.get("team_id")
-    if team_id:
-        team = get_team_by_id(team_id)
-        if team:
-            return team
-    # Fallback to default team
-    default_team = get_or_create_default_team()
-    session["team_id"] = default_team["id"]
-    return default_team
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        return team.to_dict() if team else None
+
 
 @game_bp.route("/")
 def index():
-    team = get_current_team()
-    resume_info = get_team_resume_target(team["id"])
+    from services.competition_service import get_competition_status
+    comp = get_competition_status()
 
-    # If the squad has already entered and started the mission,
-    # and they didn't explicitly request the title screen via ?home=1,
-    # automatically resume where they stopped!
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        team_dict = team.to_dict() if team else None
+        resume_info = get_team_resume_target(team.id) if team else None
+
+    # Automatically navigate based on competition state and squad status
     if request.args.get("home") != "1":
-        if resume_info.get("is_started"):
+        if not team:
+            # New visitor: redirect to squad registration
+            return redirect(url_for("game.briefing"))
+        elif comp["status"] == "LOBBY":
+            # Squad registered, awaiting host dispatch
+            return redirect(url_for("game.lobby"))
+        elif resume_info and resume_info.get("is_started") and not resume_info.get("is_finished"):
             return redirect(resume_info["resume_url"])
 
-    return render_template("index.html", team=team, resume_info=resume_info)
+    return render_template("index.html", team=team_dict, resume_info=resume_info, comp=comp)
+
+
+@game_bp.route("/lobby")
+def lobby():
+    """Mission Standby Room: where students gather until the Host starts the game."""
+    from services.competition_service import get_competition_status
+    comp = get_competition_status()
+
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        if not team:
+            return redirect(url_for("game.briefing"))
+
+        # If Host has already started the competition, jump directly to 3D Map
+        if comp["status"] == "ACTIVE":
+            return redirect(url_for("game.world_map"))
+
+        team_dict = team.to_dict()
+        members = [m.member_name for m in team.members]
+
+    return render_template("lobby.html", team=team_dict, members=members, comp=comp)
+
+
+@game_bp.route("/api/competition/status")
+def api_competition_status():
+    """Live telemetry polling endpoint for standby lobby and game HUD."""
+    from services.competition_service import get_competition_status
+    status = get_competition_status()
+    now_utc = datetime.now(timezone.utc)
+    status["server_time_ms"] = int(now_utc.timestamp() * 1000)
+
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        if team:
+            run_info = get_team_run_info(team)
+            status["team"] = {
+                "id": team.id,
+                "team_name": team.team_name,
+                "access_code": team.access_code,
+                "run_state": team.run_state,
+                "score": team.score,
+                "coins": team.coins,
+                "stars": team.stars,
+                "members": [m.member_name for m in team.members],
+                "run_info": run_info
+            }
+        else:
+            status["team"] = None
+    return jsonify(status)
+
 
 @game_bp.route("/briefing")
 def briefing():
-    team = get_current_team()
-    with db_session() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT id, team_name, access_code, score, stars, coins, current_world FROM teams ORDER BY id ASC")
-        all_teams = [dict(r) for r in cursor.fetchall()]
-    return render_template("briefing.html", team=team, all_teams=all_teams)
+    from services.competition_service import get_competition_status
+    comp = get_competition_status()
+
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        team_dict = team.to_dict() if team else None
+        all_teams = [t.to_dict() for t in sess.query(Team).order_by(Team.id.asc()).all()]
+
+    return render_template("briefing.html", team=team_dict, all_teams=all_teams, comp=comp)
+
 
 @game_bp.route("/map")
 def world_map():
-    team = get_current_team()
-    worlds = get_worlds_with_status(team["id"])
-    return render_template("map.html", team=team, worlds=worlds)
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        if not team:
+            return redirect(url_for("game.briefing"))
+
+        from services.competition_service import get_competition_status
+        comp = get_competition_status()
+        if comp["status"] == "LOBBY":
+            return redirect(url_for("game.lobby"))
+
+        team_dict = team.to_dict()
+        worlds = get_worlds_with_status(team_dict["id"])
+
+    return render_template("map.html", team=team_dict, worlds=worlds, comp=comp)
+
 
 @game_bp.route("/victory")
 def victory():
-    team = get_current_team()
-    return render_template("victory.html", team=team)
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        if not team:
+            return redirect(url_for("game.landing"))
+        team_dict = team.to_dict()
+        run_info = get_team_run_info(team)
+        normal_stars = calculate_normal_stars(team.id, sess)
+
+        # Protect victory screen from unauthorized access
+        has_boss_solve = (
+            sess.query(SolvedChallenge)
+            .filter_by(team_id=team.id, challenge_id=12)
+            .first() is not None
+        )
+        if not has_boss_solve and not run_info["is_completed"] and normal_stars < 11:
+            return redirect(url_for("game.world_map"))
+
+    return render_template("victory.html", team=team_dict, run_info=run_info)
+
 
 @game_bp.route("/end")
 @game_bp.route("/debrief")
 def end_section():
-    team = get_current_team()
-    with db_session() as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT c.id, c.title, c.points, c.coins_reward, c.star_reward, c.category, c.difficulty, c.world_id,
-                   w.name as world_name, w.icon as world_icon,
-                   sc.id as is_solved, sc.solved_at
-            FROM challenges c
-            JOIN worlds w ON c.world_id = w.id
-            LEFT JOIN solved_challenges sc ON c.id = sc.challenge_id AND sc.team_id = ?
-            ORDER BY c.id ASC
-        """, (team["id"],))
-        challenges_status = [dict(r) for r in cursor.fetchall()]
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        if not team:
+            return redirect(url_for("game.landing"))
+        team_dict = team.to_dict()
 
-        # Compute rank
-        cursor.execute("""
-            SELECT id FROM teams
-            ORDER BY score DESC, stars DESC,
-                     CASE WHEN finished_at IS NOT NULL THEN 0 ELSE 1 END,
-                     CASE WHEN total_time IS NOT NULL THEN total_time ELSE '999:99:99' END ASC,
-                     last_active ASC
-        """)
-        all_ids = [r["id"] for r in cursor.fetchall()]
-        rank = (all_ids.index(team["id"]) + 1) if team["id"] in all_ids else 1
-        total_teams = len(all_ids)
+        # Audit stream of 12 challenges
+        challenges = sess.query(Challenge).order_by(Challenge.id.asc()).all()
+        solves_map = {
+            s.challenge_id: s.solved_at.isoformat() if s.solved_at else "VERIFIED"
+            for s in sess.query(SolvedChallenge).filter_by(team_id=team.id).all()
+        }
 
-    return render_template("end.html", team=team, challenges_status=challenges_status, rank=rank, total_teams=total_teams)
+        challenges_status = []
+        for c in challenges:
+            c_dict = c.to_dict(mask_hints=True, mask_secrets=True)
+            c_dict["world_name"] = c.world.name if c.world else ""
+            c_dict["world_icon"] = c.world.icon if c.world else "🍄"
+            c_dict["is_solved"] = c.id in solves_map
+            c_dict["solved_at"] = solves_map.get(c.id)
+            challenges_status.append(c_dict)
 
-@game_bp.route("/api/team/stop-mission", methods=["POST"])
-def api_stop_mission():
-    team = get_current_team()
-    updated = finish_team_timer(team["id"])
-    if not updated:
-        updated = get_team_by_id(team["id"])
-    return jsonify({
-        "success": True,
-        "message": f"Mission concluded! Competition clock locked at {updated.get('total_time', '00:00:00')}.",
-        "team": updated,
-        "redirect_url": "/end"
-    })
+        standings = get_leaderboard_standings()
+        rank = 1
+        for idx, item in enumerate(standings, start=1):
+            if item["id"] == team.id:
+                rank = idx
+                break
 
-@game_bp.route("/api/team/reopen-mission", methods=["POST"])
-def api_reopen_mission():
-    team = get_current_team()
-    updated = reopen_team_mission(team["id"])
-    resume_target = get_team_resume_target(team["id"])
-    return jsonify({
-        "success": True,
-        "message": "Mission resumed! Competition clock reopened.",
-        "team": updated,
-        "redirect_url": resume_target["resume_url"]
-    })
+    return render_template(
+        "end.html",
+        team=team_dict,
+        challenges_status=challenges_status,
+        rank=rank,
+        total_teams=len(standings)
+    )
+
 
 @game_bp.route("/leaderboard")
 def leaderboard():
-    team = get_current_team()
-    board = get_leaderboard()
-    return render_template("leaderboard.html", team=team, leaderboard=board)
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        team_dict = team.to_dict() if team else None
 
-@game_bp.route("/api/team/set-name", methods=["POST"])
-def set_team_name():
-    team = get_current_team()
-    data = request.get_json() or {}
-    name = data.get("name", "").strip()
-    if not name:
-        return jsonify({"success": False, "message": "Team name cannot be empty"}), 400
-    
-    res = update_team_name(team["id"], name)
+    board = get_leaderboard_standings()
+    return render_template("leaderboard.html", team=team_dict, leaderboard=board)
+
+
+# ==========================================
+# TEAM MANAGEMENT & REGISTRATION APIS
+# ==========================================
+@game_bp.route("/api/team/register", methods=["POST"])
+def api_register_team():
+    if not validate_csrf(request):
+        return jsonify({"success": False, "message": "Invalid or missing CSRF token."}), 403
+
+    data = request.get_json(silent=True) or {}
+    team_name = data.get("name", "").strip()
+    member_name = data.get("member_name", "Leader").strip()
+    ip = get_client_ip(request)
+
+    res = svc_register_team(team_name, member_name=member_name, ip=ip)
     if not res["success"]:
         return jsonify(res), 400
     return jsonify(res)
 
-@game_bp.route("/api/team/register", methods=["POST"])
-def api_register_team():
-    data = request.get_json() or {}
-    name = data.get("name", "").strip()
-    if not name:
-        return jsonify({"success": False, "message": "Team name cannot be empty"}), 400
-    
-    # Check if team already exists
-    with db_session() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM teams WHERE LOWER(team_name) = ?", (name.lower(),))
-        if cursor.fetchone():
-            return jsonify({"success": False, "message": f"Team name '{name}' is already taken. Please choose another name or switch to this squad."}), 400
-
-    new_team = register_team(name)
-    session["team_id"] = new_team["id"]
-    return jsonify({
-        "success": True,
-        "message": f"Squad '{new_team['team_name']}' created successfully! Access Code: {new_team['access_code']}",
-        "team": new_team
-    })
 
 @game_bp.route("/api/team/switch", methods=["POST"])
 def api_switch_team():
-    data = request.get_json() or {}
-    identifier = str(data.get("identifier", "")).strip()
-    if not identifier:
-        return jsonify({"success": False, "message": "Please enter a team name, access code, or select a squad."}), 400
+    if not validate_csrf(request):
+        return jsonify({"success": False, "message": "Invalid or missing CSRF token."}), 403
 
-    team = None
-    # Check by access code
-    team = get_team_by_code(identifier)
-    
-    # If not found, check by team name or id
-    if not team:
-        with db_session() as conn:
-            cursor = conn.cursor()
-            if identifier.isdigit():
-                cursor.execute("SELECT * FROM teams WHERE id = ?", (int(identifier),))
-            else:
-                cursor.execute("SELECT * FROM teams WHERE LOWER(team_name) = ?", (identifier.lower(),))
-            row = cursor.fetchone()
-            if row:
-                team = dict(row)
+    data = request.get_json(silent=True) or {}
+    access_code = data.get("identifier") or data.get("access_code") or ""
+    member_name = data.get("member_name", "Agent").strip()
+    ip = get_client_ip(request)
 
-    if not team:
-        return jsonify({"success": False, "message": "Squad not found. Check the squad name or access code."}), 404
+    res = join_team_by_code(str(access_code), member_name=member_name, ip=ip)
+    if not res["success"]:
+        return jsonify(res), 400
 
-    session["team_id"] = team["id"]
-    resume_info = get_team_resume_target(team["id"])
-    return jsonify({
-        "success": True,
-        "message": f"Active squad switched to: {team['team_name']}",
-        "team": team,
+    team_id = res["team"]["id"]
+    resume_info = get_team_resume_target(team_id)
+    res.update({
         "resume_url": resume_info["resume_url"],
         "resume_label": resume_info["resume_label"],
         "is_started": resume_info["is_started"]
     })
+    return jsonify(res)
 
-@game_bp.route("/api/teams", methods=["GET"])
-def api_list_teams():
-    with db_session() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT id, team_name, access_code, score, stars, coins, current_world FROM teams ORDER BY score DESC, stars DESC")
-        teams = [dict(row) for row in cursor.fetchall()]
-    return jsonify(teams)
+
+@game_bp.route("/api/team/set-name", methods=["POST"])
+def set_team_name():
+    if not validate_csrf(request):
+        return jsonify({"success": False, "message": "Invalid or missing CSRF token."}), 403
+
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        if not team:
+            return jsonify({"success": False, "message": "No active squad."}), 400
+        team_id = team.id
+
+    data = request.get_json(silent=True) or {}
+    new_name = data.get("name", "").strip()
+    if not new_name:
+        return jsonify({"success": False, "message": "Team name cannot be empty."}), 400
+
+    from models.team import update_team_name
+    res = update_team_name(team_id, new_name)
+    if not res["success"]:
+        return jsonify(res), 400
+    return jsonify(res)
+
+
+# ==========================================
+# RUN LIFECYCLE APIS
+# ==========================================
+@game_bp.route("/api/run/start", methods=["POST"])
+def api_start_run():
+    """Explicit, state-changing POST endpoint to start the competition clock."""
+    if not validate_csrf(request):
+        return jsonify({"success": False, "message": "Invalid or missing CSRF token."}), 403
+
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        if not team:
+            return jsonify({"success": False, "message": "No active squad."}), 400
+        team_id = team.id
+
+    ip = get_client_ip(request)
+    res = start_team_run(team_id, ip=ip)
+    return jsonify(res)
+
+
+@game_bp.route("/api/team/stop-mission", methods=["POST"])
+def api_stop_mission():
+    if not validate_csrf(request):
+        return jsonify({"success": False, "message": "Invalid or missing CSRF token."}), 403
+
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        if not team:
+            return jsonify({"success": False, "message": "No active squad."}), 400
+        ip = get_client_ip(request)
+        run_info = complete_team_run(team, sess=sess, ip=ip)
+
+    return jsonify({
+        "success": True,
+        "message": f"Mission concluded! Competition clock locked at {run_info['formatted_time']}.",
+        "run_info": run_info,
+        "redirect_url": "/end"
+    })
+
+
+@game_bp.route("/api/team/reopen-mission", methods=["POST"])
+def api_reopen_mission():
+    if not validate_csrf(request):
+        return jsonify({"success": False, "message": "Invalid or missing CSRF token."}), 403
+
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        if not team:
+            return jsonify({"success": False, "message": "No active squad."}), 400
+        team_id = team.id
+
+    ip = get_client_ip(request)
+    res = reopen_team_run(team_id, admin_ip=ip)
+    resume = get_team_resume_target(team_id)
+    return jsonify({
+        "success": True,
+        "message": "Mission resumed! Competition clock reopened.",
+        "run_info": res.get("run_info"),
+        "redirect_url": resume["resume_url"]
+    })
+
 
 @game_bp.route("/api/team/status")
 def team_status():
-    team = get_current_team()
-    return jsonify({
-        "id": team["id"],
-        "name": team["team_name"],
-        "score": team["score"],
-        "coins": team["coins"],
-        "stars": team["stars"],
-        "current_world": team["current_world"]
-    })
+    with db_session() as sess:
+        team, member = get_current_team_and_member(sess)
+        run_info = get_team_run_info(team)
+        normal_stars = calculate_normal_stars(team.id, sess)
 
+        return jsonify({
+            "id": team.id,
+            "name": team.team_name,
+            "member_name": member.member_name if member else "Agent",
+            "score": team.score,
+            "coins": team.coins,
+            "stars": normal_stars,
+            "current_world": team.current_world,
+            "run_info": run_info
+        })
+
+
+@game_bp.route("/api/teams", methods=["GET"])
+def api_list_teams():
+    with db_session() as sess:
+        teams = [
+            {
+                "id": t.id,
+                "team_name": t.team_name,
+                "score": t.score,
+                "stars": t.stars,
+                "coins": t.coins,
+                "current_world": t.current_world
+            }
+            for t in sess.query(Team).order_by(Team.score.desc(), Team.stars.desc()).all()
+        ]
+    return jsonify(teams)

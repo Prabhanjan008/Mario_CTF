@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}🍄 Mario: The Cyber Heist | OJAS Tech Fest{% endblock %}</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/game3d.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/challenge.css') }}">
@@ -41,7 +42,7 @@
 
         <div class="hud-stats">
             <div class="stat-pill team" title="Investigator Identity">
-                🕵️ <span id="hud-team-val" class="stat-team-name">{{ team.team_name if team else 'Inspector Mario' }}</span>
+                🕵️ <span id="hud-team-val" class="stat-team-name">{{ team.team_name if team else 'Inspector Mario' }}{% if member_name %} <small style="color: var(--cyber-cyan); font-size: 0.78em; opacity: 0.85;">[{{ member_name }}]</small>{% endif %}</span>
             </div>
             <div class="stat-pill score" title="Forensic Points">
                 🏆 <span id="hud-score-val">{{ team.score if team else 0 }}</span> <span class="stat-unit">PTS</span>
@@ -52,8 +53,16 @@
             <div class="stat-pill stars" title="Golden Stars Recovered">
                 ⭐ <span id="hud-stars-val">{{ team.stars if team else 0 }}</span>/12
             </div>
-            <div class="stat-pill timer" id="hud-timer-pill" data-started-at="{{ team.started_at if team and team.started_at else '' }}" data-finished-at="{{ team.finished_at if team and team.finished_at else '' }}" data-total-time="{{ team.total_time if team and team.total_time else '' }}" title="Mission Clock • Click to toggle between elapsed timer and local clock">
-                ⏱️ <span id="hud-timer-val">00:00:00</span>
+            <div class="stat-pill timer" id="hud-timer-pill" 
+                 data-run-state="{{ run_info.run_state if run_info else (team.run_state if team else 'STANDBY') }}"
+                 data-elapsed-seconds="{{ run_info.elapsed_seconds if run_info else 0 }}"
+                 data-formatted-time="{{ run_info.formatted_time if run_info else '00:00:00' }}"
+                 data-total-time="{{ run_info.total_time if run_info and run_info.total_time else (team.total_time if team else '') }}"
+                 data-started-at="{{ run_info.started_at if run_info and run_info.started_at else (team.started_at if team and team.started_at else '') }}" 
+                 data-finished-at="{{ run_info.finished_at if run_info and run_info.finished_at else (team.finished_at if team and team.finished_at else '') }}" 
+                 data-server-time="{{ server_time_ms }}"
+                 title="Mission Clock • Click to toggle between elapsed timer and local clock">
+                ⏱️ <span id="hud-timer-val">{{ run_info.formatted_time if run_info and run_info.is_started else '00:00:00' }}</span>
             </div>
             {% if team and team.finished_at %}
             <a href="{{ url_for('game.end_section') }}" class="btn-hud-debrief" title="Mission Concluded • View Official Debriefing">
@@ -184,6 +193,12 @@
             });
         }
 
+        // CSRF Token Helper
+        window.getCsrfToken = function() {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            return meta ? meta.getAttribute('content') : '';
+        };
+
         if (confirmStopBtn) {
             confirmStopBtn.addEventListener('click', async () => {
                 confirmStopBtn.disabled = true;
@@ -192,7 +207,10 @@
                 try {
                     const res = await fetch('/api/team/stop-mission', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': window.getCsrfToken()
+                        }
                     });
                     const data = await res.json();
                     if (data.success) {

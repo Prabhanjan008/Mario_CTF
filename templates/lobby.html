@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}🛰️ Mission Standby Lobby | Mario: The Cyber Heist{% endblock %}
+
+{% block extra_css %}
+<style>
+    .lobby-container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 0 16px;
+    }
+    .radar-card {
+        background: radial-gradient(circle at center, rgba(16, 32, 64, 0.95), rgba(5, 12, 28, 0.98));
+        border: 2px solid var(--cyber-cyan);
+        box-shadow: 0 0 35px rgba(0, 240, 255, 0.25), inset 0 0 30px rgba(0, 240, 255, 0.08);
+        border-radius: 16px;
+        padding: 36px 28px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .radar-circle {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        border: 2px solid rgba(0, 240, 255, 0.4);
+        margin: 0 auto 24px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 240, 255, 0.03);
+    }
+    .radar-circle::before {
+        content: "";
+        position: absolute;
+        inset: -12px;
+        border-radius: 50%;
+        border: 1px dashed rgba(255, 215, 0, 0.3);
+        animation: rotateDashed 20s linear infinite;
+    }
+    .radar-sweep {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, rgba(0, 240, 255, 0.35) 0deg, transparent 60deg, transparent 360deg);
+        animation: radarSpin 2.5s linear infinite;
+    }
+    @keyframes radarSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    @keyframes rotateDashed {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .pulse-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 18px;
+        border-radius: 20px;
+        background: rgba(255, 215, 0, 0.12);
+        border: 1px solid var(--cyber-gold);
+        color: var(--cyber-gold);
+        font-family: var(--font-heading);
+        font-size: 0.88rem;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+    }
+    .pulse-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--cyber-gold);
+        box-shadow: 0 0 10px var(--cyber-gold);
+        animation: pulseAnimation 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes pulseAnimation {
+        from { transform: scale(0.8); opacity: 0.6; }
+        to { transform: scale(1.3); opacity: 1; }
+    }
+    .code-box {
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px dashed rgba(0, 240, 255, 0.4);
+        border-radius: 10px;
+        padding: 16px 24px;
+        display: inline-flex;
+        align-items: center;
+        gap: 16px;
+        margin: 16px 0 24px;
+    }
+    .member-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(0, 240, 255, 0.1);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        color: #fff;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-family: monospace;
+        margin: 4px;
+    }
+    .briefing-box {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 24px;
+        text-align: left;
+    }
+    .announcement-banner {
+        background: linear-gradient(135deg, rgba(255, 42, 77, 0.2), rgba(255, 215, 0, 0.15));
+        border: 1px solid var(--cyber-gold);
+        border-radius: 10px;
+        padding: 12px 18px;
+        margin-bottom: 20px;
+        display: none;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lobby-container">
+
+    <!-- Host Announcement Banner -->
+    <div id="lobby-announcement" class="announcement-banner">
+        <span style="font-size: 1.4rem;">📢</span>
+        <div style="flex: 1;">
+            <strong style="color: var(--cyber-gold);">CENTRAL COMMAND BROADCAST:</strong>
+            <span id="announcement-text" style="color: #fff; margin-left: 8px;"></span>
+        </div>
+    </div>
+
+    <!-- Main Radar Lobby Card -->
+    <div class="radar-card">
+        <div class="radar-circle">
+            <div class="radar-sweep"></div>
+            <span style="font-size: 2.8rem; z-index: 2;">🍄</span>
+        </div>
+
+        <div class="pulse-status" id="lobby-status-pill">
+            <span class="pulse-dot"></span>
+            <span id="lobby-status-text">STATUS: STANDBY // WAITING FOR HOST LAUNCH</span>
+        </div>
+
+        <h1 style="font-family: var(--font-heading); font-size: 2rem; color: #fff; margin-bottom: 8px; text-transform: uppercase;">
+            {{ team.team_name if team else 'Investigator Squad' }}
+        </h1>
+        <p style="color: #8da4d0; font-size: 0.95rem; max-width: 650px; margin: 0 auto 16px;">
+            Your squad is officially registered for <strong>Chanakya University • OJAS Tech Fest 2026</strong>. Central Command is calibrating the cyber sectors. Stand by!
+        </p>
+
+        <!-- Access Code Share Box -->
+        {% if team %}
+        <div>
+            <div style="font-size: 0.8rem; color: #8da4d0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">
+                SHARE THIS ACCESS CODE WITH YOUR TEAMMATES:
+            </div>
+            <div class="code-box">
+                <code id="squad-access-code" style="font-size: 1.6rem; color: var(--cyber-gold); font-weight: bold; letter-spacing: 2px;">
+                    {{ team.access_code }}
+                </code>
+                <button type="button" class="btn-secondary" style="padding: 6px 14px; font-size: 0.8rem;" onclick="copySquadCode()">
+                    📋 COPY CODE
+                </button>
+            </div>
+            <div id="copy-confirm" style="color: var(--cyber-green); font-size: 0.82rem; height: 18px; margin-top: -16px; margin-bottom: 12px; opacity: 0; transition: opacity 0.2s;">
+                ✅ Code copied to clipboard! Share it with your squad.
+            </div>
+        </div>
+
+        <!-- Squad Roster -->
+        <div style="margin-top: 10px;">
+            <div style="font-size: 0.8rem; color: #8da4d0; margin-bottom: 8px; font-weight: bold;">
+                CONNECTED SQUAD AGENTS:
+            </div>
+            <div id="squad-members-list">
+                {% if members %}
+                    {% for m in members %}
+                    <span class="member-pill">🕵️ {{ m }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="member-pill">🕵️ Agent</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Connected Squads Counter -->
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;">
+            <div>
+                <div style="font-size: 1.8rem; font-family: var(--font-heading); color: var(--cyber-cyan);" id="stat-total-teams">
+                    {{ comp.total_teams if comp else 0 }}
+                </div>
+                <div style="font-size: 0.75rem; color: #8da4d0;">SQUADS IN STANDBY</div>
+            </div>
+            <div>
+                <div style="font-size: 1.8rem; font-family: var(--font-heading); color: var(--cyber-green);" id="stat-total-members">
+                    {{ comp.total_members if comp else 0 }}
+                </div>
+                <div style="font-size: 0.75rem; color: #8da4d0;">STUDENT INVESTIGATORS</div>
+            </div>
+            <div>
+                <div style="font-size: 1.8rem; font-family: var(--font-heading); color: var(--cyber-gold);" id="stat-competition-mode">
+                    LOBBY
+                </div>
+                <div style="font-size: 0.75rem; color: #8da4d0;">COMPETITION PHASE</div>
+            </div>
+        </div>
+
+        <!-- Fast Link to Switch Squad -->
+        <div style="margin-top: 24px;">
+            <a href="{{ url_for('game.briefing') }}" style="color: #8da4d0; font-size: 0.82rem; text-decoration: underline;">
+                Switch Squad or Register Another Team 🔄
+            </a>
+        </div>
+    </div>
+
+    <!-- Pre-Mission Rules & Intel -->
+    <div class="briefing-box">
+        <h3 style="font-family: var(--font-heading); color: var(--cyber-gold); margin-bottom: 12px; font-size: 1.05rem;">
+            📜 RULES OF ENGAGEMENT // OJAS 2026 CTF
+        </h3>
+        <ul style="color: #8da4d0; font-size: 0.88rem; line-height: 1.7; padding-left: 20px; margin: 0;">
+            <li><strong>Authoritative Timer:</strong> The mission clock will start synchronously for all squads the instant the Host issues the launch command.</li>
+            <li><strong>Squad Synchronization:</strong> Points, unlocked hints, and stars are shared across all teammates in real-time.</li>
+            <li><strong>Star Gating:</strong> Solve cases to earn stars. Sector 02 unlocks at 2 stars, Sector 03 at 5 stars, Sector 04 at 8 stars, and the Final Boss at 11 stars.</li>
+            <li><strong>Anti-Brute-Force:</strong> Rapid spamming of incorrect flags triggers a progressive timeout. Analyze artifacts carefully!</li>
+            <li><strong>Automatic Warp:</strong> Keep this page open. As soon as the Host clicks <em>"Start Game"</em>, your screen will automatically launch into the 3D Cyber Map!</li>
+        </ul>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function copySquadCode() {
+        const code = document.getElementById('squad-access-code').innerText.trim();
+        navigator.clipboard.writeText(code).then(() => {
+            const confirm = document.getElementById('copy-confirm');
+            confirm.style.opacity = '1';
+            setTimeout(() => { confirm.style.opacity = '0'; }, 3000);
+        });
+    }
+
+    // Play retro warp chime when game starts
+    function playStartChime() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.2, ctx.currentTime + idx * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + idx * 0.1 + 0.3);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(ctx.currentTime + idx * 0.1);
+                osc.stop(ctx.currentTime + idx * 0.1 + 0.3);
+            });
+        } catch(e) {
+            console.log('Audio auto-play note:', e);
+        }
+    }
+
+    // Live Polling every 2.0 seconds for Host Launch Signal
+    let isRedirecting = false;
+    async function checkLobbyStatus() {
+        if (isRedirecting) return;
+        try {
+            const res = await fetch('/api/competition/status', { credentials: 'same-origin' });
+            if (!res.ok) return;
+            const data = await res.json();
+
+            // Update stats
+            if (data.total_teams !== undefined) {
+                document.getElementById('stat-total-teams').innerText = data.total_teams;
+            }
+            if (data.total_members !== undefined) {
+                document.getElementById('stat-total-members').innerText = data.total_members;
+            }
+            if (data.status) {
+                document.getElementById('stat-competition-mode').innerText = data.status;
+            }
+
+            // Update announcement
+            const annBox = document.getElementById('lobby-announcement');
+            const annText = document.getElementById('announcement-text');
+            if (data.announcement) {
+                annText.innerText = data.announcement;
+                annBox.style.display = 'flex';
+            } else {
+                annBox.style.display = 'none';
+            }
+
+            // Update member roster if changed
+            if (data.team && data.team.members) {
+                const list = document.getElementById('squad-members-list');
+                list.innerHTML = data.team.members.map(m => `<span class="member-pill">🕵️ ${m}</span>`).join('');
+            }
+
+            // IF HOST HAS STARTED THE COMPETITION -> AUTO-LAUNCH TO 3D MAP!
+            if (data.status === 'ACTIVE' && data.can_play) {
+                isRedirecting = true;
+                const pill = document.getElementById('lobby-status-pill');
+                const text = document.getElementById('lobby-status-text');
+                pill.style.background = 'rgba(0, 255, 157, 0.2)';
+                pill.style.borderColor = 'var(--cyber-green)';
+                pill.style.color = 'var(--cyber-green)';
+                text.innerText = '🚀 MISSION DISPATCHED! WARPING TO 3D WORLD MAP...';
+
+                playStartChime();
+                setTimeout(() => {
+                    window.location.href = '/map';
+                }, 1000);
+            }
+        } catch (err) {
+            console.error('Lobby poll error:', err);
+        }
+    }
+
+    // Poll every 2 seconds
+    setInterval(checkLobbyStatus, 2000);
+    checkLobbyStatus();
+</script>
+{% endblock %}
