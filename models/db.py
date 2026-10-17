@@ -128,6 +128,25 @@ def init_database(reset: bool = False, seed: bool = True):
     
     Base.metadata.create_all(bind=engine)
 
+    # Ensure new columns exist on existing tables (PostgreSQL & SQLite)
+    from sqlalchemy import text
+    try:
+        with engine.begin() as conn:
+            for col_name, col_type in [
+                ("student_name", "VARCHAR(100)"),
+                ("register_number", "VARCHAR(64)"),
+                ("phone_number", "VARCHAR(32)")
+            ]:
+                try:
+                    if IS_SQLITE:
+                        conn.execute(text(f"ALTER TABLE teams ADD COLUMN {col_name} {col_type};"))
+                    else:
+                        conn.execute(text(f"ALTER TABLE teams ADD COLUMN IF NOT EXISTS {col_name} {col_type};"))
+                except Exception:
+                    pass
+    except Exception as e:
+        print(f"Notice: Column migration check: {e}")
+
     if not seed:
         return
 

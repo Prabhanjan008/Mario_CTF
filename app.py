@@ -97,6 +97,30 @@ def create_app():
             "database": "connected"
         }
 
+    @app.route("/api/diag")
+    def diagnostics():
+        results = {}
+        import traceback
+        try:
+            from models.db import db_session, engine, IS_SQLITE
+            results["db_type"] = "sqlite" if IS_SQLITE else "postgresql"
+            results["engine_url"] = str(engine.url).split("@")[-1]
+            with db_session() as sess:
+                from models.schema import CompetitionState, Team, Challenge, World
+                results["worlds_count"] = sess.query(World).count()
+                results["challenges_count"] = sess.query(Challenge).count()
+                comp = sess.query(CompetitionState).first()
+                results["comp_status"] = comp.status if comp else "MISSING"
+                results["teams_count"] = sess.query(Team).count()
+                sample_team = sess.query(Team.id, Team.team_name, Team.student_name, Team.register_number).first()
+                results["sample_team"] = str(sample_team) if sample_team else "none"
+            results["status"] = "ALL_HEALTHY"
+        except Exception as ex:
+            results["status"] = "ERROR"
+            results["error"] = str(ex)
+            results["traceback"] = traceback.format_exc()
+        return results
+
     @app.errorhandler(403)
     def forbidden(e):
         return {"error": "Forbidden: Request verification or authorization failed."}, 403
@@ -107,7 +131,15 @@ def create_app():
 
     @app.errorhandler(500)
     def internal_error(e):
-        return {"error": "Internal Server Error. Forensic incident logged."}, 500
+        import traceback
+        import sys
+        print("--- 500 INTERNAL SERVER ERROR ---", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        err_msg = str(getattr(e, "original_exception", e))
+        return {
+            "error": "Internal Server Error. Forensic incident logged.",
+            "detail": err_msg
+        }, 500
 
     return app
 
