@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mario: The Cyber Heist — Official CTF Tournament Rules & Guide</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@700;800;900&display=swap');
+
+        @page {
+            size: A4;
+            margin: 12mm 14mm 14mm 14mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #1a202c;
+            background: #ffffff;
+            font-size: 11pt;
+            line-height: 1.5;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+
+        /* Header Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #ff1a40;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .brand-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20pt;
+            font-weight: 900;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+
+        .brand-title span {
+            color: #ff1a40;
+        }
+
+        .sub-brand {
+            font-size: 9pt;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 2px;
+        }
+
+        .confidential-badge {
+            background: #0f172a;
+            color: #00f0ff;
+            border: 1px solid #00f0ff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8pt;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: right;
+        }
+
+        /* Briefing Callout */
+        .incident-card {
+            background: #f8fafc;
+            border-left: 5px solid #00f0ff;
+            border-radius: 0 6px 6px 0;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .incident-card h2 {
+            font-size: 11pt;
+            font-weight: 800;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .incident-card p {
+            font-size: 9.5pt;
+            color: #334155;
+            line-height: 1.45;
+        }
+
+        /* Section Headings */
+        h2.section-header {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12pt;
+            font-weight: 800;
+            color: #0f172a;
+            border-bottom: 1.5px solid #cbd5e1;
+            padding-bottom: 4px;
+            margin-top: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+        }
+
+        /* Tables */
+        table.styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+            margin-bottom: 14px;
+        }
+
+        table.styled-table th {
+            background: #0f172a;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            text-align: left;
+            padding: 7px 10px;
+            border: 1px solid #0f172a;
+            font-size: 8.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        table.styled-table td {
+            padding: 6px 10px;
+            border: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+
+        table.styled-table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .badge-star {
+            background: #fef08a;
+            color: #854d0e;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 8pt;
+            display: inline-block;
+        }
+
+        .badge-unlocked {
+            background: #dcfce7;
+            color: #166534;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 8pt;
+            display: inline-block;
+        }
+
+        /* Grid Cards */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .info-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px 14px;
+        }
+
+        .info-card h3 {
+            font-size: 9.5pt;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-card p {
+            font-size: 8.8pt;
+            color: #475569;
+            line-height: 1.4;
+        }
+
+        /* Rules list */
+        .rules-list {
+            list-style: none;
+            margin-bottom: 12px;
+        }
+
+        .rules-list li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 6px;
+            font-size: 9.2pt;
+            color: #1e293b;
+            line-height: 1.45;
+        }
+
+        .rules-list li::before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #ff1a40;
+            font-size: 7.5pt;
+            top: 2px;
+        }
+
+        .rules-list li strong {
+            color: #0f172a;
+        }
+
+        .code-snippet {
+            font-family: 'JetBrains Mono', monospace;
+            background: #e2e8f0;
+            color: #0f172a;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 8.5pt;
+            font-weight: 600;
+        }
+
+        /* Prohibited Box */
+        .warning-box {
+            background: #fff1f2;
+            border: 1.5px solid #fecdd3;
+            border-left: 5px solid #e11d48;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+        }
+
+        .warning-box h4 {
+            font-size: 9.5pt;
+            font-weight: 800;
+            color: #9f1239;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .warning-box ul {
+            list-style: disc;
+            margin-left: 18px;
+            font-size: 8.8pt;
+            color: #881337;
+            line-height: 1.4;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 16px;
+            border-top: 1.5px solid #cbd5e1;
+            padding-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 8pt;
+            color: #64748b;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 9pt;
+            color: #1e293b;
+        }
+
+        .checkbox {
+            width: 14px;
+            height: 14px;
+            border: 1.5px solid #64748b;
+            border-radius: 3px;
+            display: inline-block;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PAGE 1 -->
+    <div class="header">
+        <div>
+            <div class="brand-title">MARIO: <span>THE CYBER HEIST</span></div>
+            <div class="sub-brand">Chanakya University • OJAS Tech Fest 2026 • Official CTF Participant Guide</div>
+        </div>
+        <div class="confidential-badge">
+            Classification: EYES ONLY<br>
+            Threat Level: OMEGA
+        </div>
+    </div>
+
+    <div class="incident-card">
+        <h2>🚨 Incident Briefing: Operation Recover The Golden Star</h2>
+        <p>
+            At <strong>03:14:07 AM</strong>, the Mushroom Kingdom Master Sanctum vault perimeter collapsed. The kingdom’s core power source, <strong>THE GOLDEN STAR</strong>, was exfiltrated by rogue syndicate <strong>'PHANTOM_SHROOM'</strong>. As cyber operatives, your mission is to investigate compromised sectors on the <strong>3D World Map</strong>, extract forensic clues, defeat Bowser’s mainframe shields, and recover the Golden Star.
+        </p>
+    </div>
+
+    <h2 class="section-header">🗺️ 1. Sector Progression & Forensic Workbenches</h2>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th style="width: 50px;">Sec</th>
+                <th style="width: 140px;">Sector Name</th>
+                <th>Forensic Specialization & Objectives</th>
+                <th style="width: 110px;">Gating Req.</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>01</strong></td>
+                <td><strong>Mushroom Village</strong></td>
+                <td>Exif metadata extraction, Wireshark PCAP packet inspection, Linux file permissions & SUID escalation.</td>
+                <td><span class="badge-unlocked">0 ⭐ Unlocked</span></td>
+            </tr>
+            <tr>
+                <td><strong>02</strong></td>
+                <td><strong>Dark Forest</strong></td>
+                <td>SQL Injection auth bypass, SHA-256 rainbow tables / cryptographic hash cracking, DOM XSS sanitization.</td>
+                <td><span class="badge-star">2 ⭐ Required</span></td>
+            </tr>
+            <tr>
+                <td><strong>03</strong></td>
+                <td><strong>Haunted Mansion</strong></td>
+                <td>Python bytecode decompilation, memory buffer overflow analysis, encrypted firmware binary extraction.</td>
+                <td><span class="badge-star">5 ⭐ Required</span></td>
+            </tr>
+            <tr>
+                <td><strong>04</strong></td>
+                <td><strong>Koopa HQ</strong></td>
+                <td>JWT signature forgery / secret brute-forcing, Insecure AWS S3 cloud bucket enumeration.</td>
+                <td><span class="badge-star">8 ⭐ Required</span></td>
+            </tr>
+            <tr>
+                <td><strong>05</strong></td>
+                <td><strong>Final Fortress</strong></td>
+                <td><strong>Three-Stage Boss Showdown:</strong> Phase 1 (4 Sector Shields) → Phase 2 (Cyber Trivia) → Phase 3 (Master Flag).</td>
+                <td><span class="badge-star" style="background: #fde047; color: #713f12;">11 ⭐ Required</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2 class="section-header">🎮 2. Scoring System & Game Economy</h2>
+    <div class="grid-2">
+        <div class="info-card">
+            <h3>🏆 Forensic Points (Score)</h3>
+            <p>Every case cleared awards between <strong>100 to 500 PTS</strong> based on difficulty. Solves are atomically registered on the blockchain-style immutable ledger.</p>
+        </div>
+        <div class="info-card">
+            <h3>⭐ Golden Stars (0 - 12)</h3>
+            <p>Cases 1–11 award 1 Star each. Accumulate stars to dissolve quantum firewalls guarding higher sectors on the 3D map. Clear all 11 to breach the Boss Fortress.</p>
+        </div>
+        <div class="info-card">
+            <h3>🪙 Cyber Coins & 3D ? Blocks</h3>
+            <p>Each squad starts with <strong>100 Cyber Coins</strong>. Earn more by solving cases or clicking floating <strong>3D Question Blocks</strong> on the world map. Spend coins to decrypt hints!</p>
+        </div>
+        <div class="info-card">
+            <h3>⏱️ Monotonic Competition Timer</h3>
+            <p>High-precision timer synchronized with the server's UTC ledger. Automatically freezes the exact millisecond the final flag is verified or upon squad conclusion.</p>
+        </div>
+    </div>
+
+    <h2 class="section-header">👥 3. Multi-Member Squad Collaboration</h2>
+    <ul class="rules-list">
+        <li><strong>Squad Access Code:</strong> The lead operative registers the squad name and receives a unique cryptographic access code (e.g., <span class="code-snippet">CYBER-W7KP-92RM</span>).</li>
+        <li><strong>Live Team Concurrency:</strong> Teammates join from their own laptops by entering the access code and their name.</li>
+        <li><strong>Shared State Synchronization:</strong> All squad members share live forensic solves, star progress, coins, and hint logs without conflicting state or race conditions.</li>
+    </ul>
+
+    <div class="footer">
+        <span>OJAS Tech Fest 2026 • Chanakya University</span>
+        <span>Page 1 of 2</span>
+    </div>
+
+    <!-- PAGE 2 -->
+    <div class="page-break"></div>
+
+    <div class="header">
+        <div>
+            <div class="brand-title">OFFICIAL <span>RULES & CODE OF CONDUCT</span></div>
+            <div class="sub-brand">Chanakya University • OJAS Tech Fest 2026 • Security Regulations</div>
+        </div>
+        <div class="confidential-badge">
+            Regulation ID: CTF-REG-2026
+        </div>
+    </div>
+
+    <h2 class="section-header">📜 4. Official Tournament Rules</h2>
+
+    <ul class="rules-list">
+        <li>
+            <strong>Flag Submission Format:</strong> All flags strictly adhere to the format <span class="code-snippet">FLAG{SAMPLE_FLAG_TEXT}</span>. Flags are <strong>case-sensitive</strong> and must include the curly braces.
+        </li>
+        <li>
+            <strong>Anti-Brute-Force Rate Limiting:</strong> Automated script-based brute forcing against challenge submission endpoints is restricted to a maximum of <strong>10 attempts per 30 seconds</strong> per squad.
+        </li>
+        <li>
+            <strong>Hint Transparency:</strong> Purchasing hints deducts Cyber Coins permanently from your squad's balance. Hints are progressive (Hint 1 → Hint 2).
+        </li>
+        <li>
+            <strong>Deterministic Tie-Breaking Protocol:</strong> Ties on the official leaderboard are resolved in strict deterministic order:
+            <ol style="margin-left: 24px; margin-top: 4px; font-size: 8.8pt; color: #334155;">
+                <li>1. Total Forensic Score (PTS) DESC</li>
+                <li>2. Normal Golden Stars Recovered DESC</li>
+                <li>3. Mission Completion Status (Boss Fortress cleared first)</li>
+                <li>4. Total Elapsed Mission Time ASC</li>
+                <li>5. Timestamp of Final Flag Solve ASC</li>
+            </ol>
+        </li>
+    </ul>
+
+    <div class="warning-box">
+        <h4>⚠️ Prohibited Actions (Immediate Disqualification & Removal)</h4>
+        <ul>
+            <li><strong>Infrastructure Tampering:</strong> Do NOT launch Denial-of-Service (DoS/DDoS) attacks, automated fuzzing scanners, or exploit attempts against the host server or platform APIs. All investigations are strictly self-contained within challenge workbenches.</li>
+            <li><strong>Cross-Squad Collusion:</strong> Sharing flags, keys, solutions, or access codes with other competing squads is strictly prohibited.</li>
+            <li><strong>Account Tampering:</strong> Do NOT attempt to hijack or brute force other squads' access codes or sessions.</li>
+        </ul>
+    </div>
+
+    <h2 class="section-header">🚀 5. Operative Quickstart Checklist</h2>
+    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px 16px; margin-bottom: 20px;">
+        <div class="checklist-item">
+            <span class="checkbox"></span>
+            <div><strong>Step 1:</strong> Navigate to the game portal at the announced tournament link and click <strong>"REGISTER SQUAD"</strong>.</div>
+        </div>
+        <div class="checklist-item">
+            <span class="checkbox"></span>
+            <div><strong>Step 2:</strong> Enter your squad name and operative handle. Copy and securely share your <strong>Squad Access Code</strong> with your teammates.</div>
+        </div>
+        <div class="checklist-item">
+            <span class="checkbox"></span>
+            <div><strong>Step 3:</strong> Review the <strong>Mission Briefing</strong> and inspect Sector 01 on the <strong>3D World Map</strong>.</div>
+        </div>
+        <div class="checklist-item">
+            <span class="checkbox"></span>
+            <div><strong>Step 4:</strong> Click on Case nodes to open forensic terminals, examine evidence, crack payloads, and submit flags.</div>
+        </div>
+        <div class="checklist-item">
+            <span class="checkbox"></span>
+            <div><strong>Step 5:</strong> Recover all 11 Golden Stars, breach Bowser’s Fortress in Sector 05, and lock in your final time!</div>
+        </div>
+    </div>
+
+    <!-- Official Validation Seal -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 28px; padding: 14px 20px; background: #f1f5f9; border-radius: 6px; border: 1px solid #cbd5e1;">
+        <div>
+            <div style="font-size: 8pt; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Tournament Authorization</div>
+            <div style="font-family: 'Orbitron', sans-serif; font-size: 11pt; font-weight: 800; color: #0f172a; margin-top: 2px;">
+                OJAS 2026 ORGANIZING COMMITTEE
+            </div>
+            <div style="font-size: 8pt; color: #475569; margin-top: 2px;">
+                Chanakya University Cyber Security Directorate • Bangalore, India
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 8pt; color: #0f172a; font-weight: 700; border: 1.5px dashed #0f172a; padding: 6px 12px; border-radius: 4px; display: inline-block;">
+                VERIFIED OFFICIAL BRIEFING
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>Mario: The Cyber Heist • CTF Tournament Regulations</span>
+        <span>Page 2 of 2</span>
+    </div>
+
+</body>
+</html>
