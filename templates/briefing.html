@@ -64,16 +64,16 @@
             </div>
         </div>
 
-        <!-- SQUAD REGISTRATION & DISPATCH TERMINAL -->
+        <!-- INVESTIGATOR REGISTRATION & DISPATCH TERMINAL -->
         <div class="cyber-card" style="border: 1px solid var(--cyber-cyan); background: rgba(0, 240, 255, 0.03); margin-top: 10px;">
             <div class="card-title" style="color: var(--cyber-cyan);">
-                🕵️ SQUAD REGISTRATION & DISPATCH TERMINAL
+                🕵️ INVESTIGATOR REGISTRATION & DISPATCH TERMINAL
             </div>
 
-            <!-- Current Active Squad Indicator -->
+            <!-- Current Active Operative Indicator -->
             <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                 <div>
-                    <span style="font-size: 0.75rem; color: #8da4d0; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;">Currently Active Squad:</span>
+                    <span style="font-size: 0.75rem; color: #8da4d0; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;">Currently Active Operative:</span>
                     <strong id="active-squad-name" style="font-size: 1.25rem; color: #fff; font-family: var(--font-heading);">{{ team.team_name if team else 'Inspector Mario' }}</strong>
                     <span style="margin-left: 10px; font-family: monospace; font-size: 0.85rem; color: var(--cyber-cyan); background: rgba(0, 240, 255, 0.1); padding: 3px 8px; border-radius: 4px;">
                         🔑 CODE: {{ team.access_code if team else 'MARIO-OJAS-2026' }}
@@ -86,39 +86,39 @@
                 </div>
             </div>
 
-            <!-- Squad Operations Grid -->
+            <!-- Operative Operations Grid -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <!-- Card 1: Register New Squad -->
+                <!-- Card 1: Register New Operative -->
                 <div style="background: rgba(0, 255, 102, 0.04); border: 1px solid rgba(0, 255, 102, 0.25); border-radius: 8px; padding: 16px;">
                     <div style="font-family: var(--font-heading); font-size: 0.9rem; color: var(--cyber-green); margin-bottom: 8px;">
-                        ✨ REGISTER NEW PARTICIPATING SQUAD
+                        ✨ REGISTER AS NEW INVESTIGATOR
                     </div>
                     <p style="font-size: 0.82rem; color: #9ab4db; margin-bottom: 12px;">
-                        Create a fresh team for the OJAS competition. Starts with 100 Cyber Coins and an independent leaderboard ranking!
+                        Register your individual operative identity for OJAS 2026. Starts with 100 Cyber Coins and an independent rank!
                     </p>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <input id="new-team-input" type="text" class="flag-input" placeholder="Enter New Squad Name (e.g. CyberVipers)" autocomplete="off" style="padding: 10px 12px; font-size: 0.9rem;">
-                        <input id="new-member-input" type="text" class="flag-input" placeholder="Your Investigator Handle (e.g. Neo)" autocomplete="off" style="padding: 8px 12px; font-size: 0.85rem;">
+                        <input id="new-team-input" type="text" class="flag-input" placeholder="Detective / Operative Alias (e.g. CyberViper)" autocomplete="off" style="padding: 10px 12px; font-size: 0.9rem;">
+                        <input id="new-member-input" type="text" class="flag-input" placeholder="Your Real Name / Student ID (e.g. CU2026)" autocomplete="off" style="padding: 8px 12px; font-size: 0.85rem;">
                         <button id="register-team-btn" class="btn-primary" style="padding: 10px 16px; font-size: 0.9rem; background: linear-gradient(135deg, #00cc55, #008833);">
-                            🚀 REGISTER SQUAD
+                            🚀 REGISTER OPERATIVE
                         </button>
                     </div>
                 </div>
 
-                <!-- Card 2: Switch to Existing Squad -->
+                <!-- Card 2: Resume with Access Code -->
                 <div style="background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 8px; padding: 16px;">
                     <div style="font-family: var(--font-heading); font-size: 0.9rem; color: var(--cyber-cyan); margin-bottom: 8px;">
-                        🔁 JOIN / SWITCH SQUAD BY ACCESS CODE
+                        🔁 RESUME SESSION WITH ACCESS CODE
                     </div>
                     <p style="font-size: 0.82rem; color: #9ab4db; margin-bottom: 12px;">
-                        Join your team from any device using their secret access code (OJAS-XXXXXXXX):
+                        Resume your investigation from any browser using your secret personal access code (OJAS-XXXXXXXX):
                     </p>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <input id="switch-code-input" type="text" class="flag-input" placeholder="Squad Access Code (e.g. OJAS-9K3M4X7P)" style="padding: 9px 12px; font-size: 0.9rem; font-family: monospace; text-transform: uppercase;">
-                        <input id="switch-member-input" type="text" class="flag-input" placeholder="Your Investigator Handle (e.g. Trinity)" style="padding: 8px 12px; font-size: 0.85rem;">
+                        <input id="switch-code-input" type="text" class="flag-input" placeholder="Personal Access Code (e.g. OJAS-9K3M4X7P)" style="padding: 9px 12px; font-size: 0.9rem; font-family: monospace; text-transform: uppercase;">
+                        <input id="switch-member-input" type="text" class="flag-input" placeholder="Operative Handle / Name" style="padding: 8px 12px; font-size: 0.85rem;">
                         <div style="display: flex; gap: 8px;">
                             <select id="switch-team-select" class="flag-input" style="padding: 8px 10px; font-size: 0.82rem; background: #060b18; flex: 1;">
-                                <option value="">-- Or Choose Public Squad --</option>
+                                <option value="">-- Or Choose Registered Operative --</option>
                                 {% for t in all_teams %}
                                 <option value="{{ t.id }}" {% if team and t.id == team.id %}selected{% endif %}>
                                     {{ t.team_name }} (⭐ {{ t.stars }} | 🏆 {{ t.score }} PTS)
@@ -126,18 +126,18 @@
                                 {% endfor %}
                             </select>
                             <button id="switch-team-btn" class="btn-secondary" style="padding: 8px 14px; white-space: nowrap; font-size: 0.85rem;">
-                                JOIN SQUAD 🚀
+                                RESUME 🚀
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 3: Rename Current Squad (Single line) -->
+            <!-- Card 3: Rename Current Operative (Single line) -->
             <div style="background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                     <label style="font-family: var(--font-heading); font-size: 0.82rem; color: #8da4d0;">
-                        RENAME ACTIVE SQUAD:
+                        UPDATE DETECTIVE ALIAS:
                     </label>
                     <input id="team-name-input" type="text" value="{{ team.team_name if team else 'Inspector Mario' }}" class="flag-input" style="width: 260px; padding: 8px 12px; font-size: 0.9rem;">
                     <button id="save-team-btn" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">

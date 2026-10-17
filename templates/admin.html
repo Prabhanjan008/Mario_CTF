@@ -130,7 +130,7 @@
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <a href="{{ url_for('game.world_map') }}" class="back-btn">⬅️ 3D MAP</a>
             <a href="{{ url_for('game.briefing') }}" class="btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">
-                📋 SQUAD DISPATCH
+                📋 INVESTIGATOR DISPATCH
             </a>
             <a href="{{ url_for('game.leaderboard') }}" class="btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">
                 🏆 PUBLIC STANDINGS
@@ -165,7 +165,7 @@
             <!-- Quick Action Buttons -->
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <button id="btn-start-competition" class="btn-primary" style="background: linear-gradient(135deg, #00ff9d, #00aa66); color: #021a0d; font-weight: bold; padding: 10px 20px; font-size: 0.9rem; box-shadow: 0 0 20px rgba(0, 255, 157, 0.4); border: none; cursor: pointer;" onclick="handleStartCompetition()">
-                    🚀 START GAME FOR ALL SQUADS
+                    🚀 START GAME FOR ALL PLAYERS
                 </button>
                 <button id="btn-pause-competition" class="btn-secondary" style="border-color: var(--cyber-gold); color: var(--cyber-gold); padding: 10px 16px; font-size: 0.82rem;" onclick="handleTogglePauseCompetition()">
                     ⏸️ PAUSE / RESUME
@@ -174,7 +174,7 @@
                     🏁 CONCLUDE
                 </button>
                 <button id="btn-clean-slate" class="btn-secondary" style="border-color: #ff5555; background: rgba(255, 85, 85, 0.1); color: #ff9999; padding: 10px 16px; font-size: 0.82rem;" onclick="handleCleanSlateReset()">
-                    🧹 PURGE TEST SQUADS (CLEAN LOBBY)
+                    🧹 PURGE TEST PLAYERS (CLEAN LOBBY)
                 </button>
             </div>
         </div>
@@ -195,7 +195,7 @@
     <!-- Live Metrics Grid -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; margin-bottom: 24px;">
         <div class="cyber-card" style="margin-bottom: 0; text-align: center; border-color: rgba(0, 240, 255, 0.4);">
-            <div style="font-size: 0.82rem; color: #8da4d0; font-family: var(--font-heading);">ACTIVE SQUADS</div>
+            <div style="font-size: 0.82rem; color: #8da4d0; font-family: var(--font-heading);">ACTIVE INVESTIGATORS</div>
             <div style="font-size: 2.2rem; font-family: var(--font-heading); color: var(--cyber-cyan); margin-top: 4px;">
                 {{ total_teams }}
             </div>
@@ -232,7 +232,7 @@
     <!-- Organizer Navigation Tabs -->
     <div class="admin-tab-nav">
         <button class="admin-tab-btn active" onclick="switchAdminTab('teams-tab', this)">
-            📊 SQUADS TRACKER & RESULTS
+            📊 INVESTIGATORS TRACKER & RESULTS
         </button>
         <button class="admin-tab-btn" onclick="switchAdminTab('audit-tab', this)">
             📜 LIVE SUBMISSION STREAM
@@ -256,14 +256,14 @@
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 18px;">
                 <div>
                     <div class="card-title" style="margin-bottom: 4px;">
-                        📊 LIVE TEAM TRACKER & CHALLENGE SOLVE MATRIX
+                        📊 LIVE INVESTIGATOR TRACKER & CHALLENGE SOLVE MATRIX
                     </div>
                     <div style="font-size: 0.82rem; color: #8da4d0;">
                         Track real-time progress, scores, access codes, and individual case completions (Cases 1 to 12).
                     </div>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
-                    <input id="team-search-input" type="text" class="flag-input" placeholder="🔍 Filter squad or access code..." style="padding: 8px 14px; width: 260px; font-size: 0.85rem;">
+                    <input id="team-search-input" type="text" class="flag-input" placeholder="🔍 Filter operative or access code..." style="padding: 8px 14px; width: 260px; font-size: 0.85rem;">
                     <button onclick="window.location.reload()" class="btn-secondary" style="padding: 8px 14px; font-size: 0.85rem;" title="Refresh Data">
                         REFRESH 🔄
                     </button>
@@ -289,7 +289,7 @@
                     <thead>
                         <tr>
                             <th style="width: 60px;">RANK</th>
-                            <th>SQUAD IDENTITY</th>
+                            <th>INVESTIGATOR ALIAS</th>
                             <th>ACCESS CODE</th>
                             <th>SCORE</th>
                             <th>STARS</th>

@@ -264,7 +264,7 @@ def build_rules_pdf(output_path="MARIO_CTF_OFFICIAL_RULES_AND_GUIDE.pdf"):
         Paragraph("<b>⭐ Golden Stars (0 - 12)</b><br/>Cases 1–11 award 1 Star each. Accumulate stars to dissolve quantum firewalls guarding higher sector islands. Clearing all 11 unlocks Bowser's Fortress.", body_style)
     ]
     eco_col2 = [
-        Paragraph("<b>🪙 Cyber Coins & 3D ? Blocks</b><br/>Each squad starts with <b>100 Cyber Coins</b>. Earn more by solving cases or clicking floating 3D Question Blocks on the map. Spend coins to decrypt hints!", body_style),
+        Paragraph("<b>🪙 Cyber Coins & 3D ? Blocks</b><br/>Each investigator starts with <b>100 Cyber Coins</b>. Earn more by solving cases or clicking floating 3D Question Blocks on the map. Spend coins to decrypt hints!", body_style),
         Spacer(1, 6),
         Paragraph("<b>⏱️ Monotonic Competition Timer</b><br/>High-precision competition clock calibrated with server UTC. Automatically locks the exact millisecond the final Boss flag is verified.", body_style)
     ]
@@ -283,12 +283,12 @@ def build_rules_pdf(output_path="MARIO_CTF_OFFICIAL_RULES_AND_GUIDE.pdf"):
     story.append(t_eco)
     story.append(Spacer(1, 10))
 
-    # 5. Squad Collaboration
-    story.append(Paragraph("👥 3. MULTI-MEMBER SQUAD COLLABORATION", h1_style))
+    # 5. Solo Operative System
+    story.append(Paragraph("👤 3. SOLO INVESTIGATOR SYSTEM & SESSION PORTABILITY", h1_style))
     story.append(Spacer(1, 4))
-    story.append(Paragraph("• <b>Squad Access Codes:</b> The team leader registers the squad name and receives a unique cryptographic access code (e.g., <code>CYBER-W7KP-92RM</code>).", bullet_style))
-    story.append(Paragraph("• <b>Simultaneous Device Access:</b> Teammates join from their own laptops by entering the Access Code and their operative handle.", bullet_style))
-    story.append(Paragraph("• <b>Live State Synchronization:</b> Solved flags, recovered stars, coin balance, and unlocked hints update in real time across all squad members.", bullet_style))
+    story.append(Paragraph("• <b>Individual 1-vs-All Format:</b> Every participant competes independently on their personal laptop or workstation. No squads or team collaboration.", bullet_style))
+    story.append(Paragraph("• <b>Personal Access Code:</b> When you register, you receive a unique cryptographic access code (e.g., <code>OJAS-W7KP-92RM</code>). Keep it safe!", bullet_style))
+    story.append(Paragraph("• <b>Session Portability:</b> Resume your mission from any browser or workstation by entering your Access Code. Solves and coins are saved in real-time.", bullet_style))
 
     # Page Break to Page 2
     story.append(PageBreak())
@@ -304,16 +304,16 @@ def build_rules_pdf(output_path="MARIO_CTF_OFFICIAL_RULES_AND_GUIDE.pdf"):
 
     story.append(Paragraph("<b>1. Standard Flag Format:</b> All flags strictly adhere to the standardized structure: <code>FLAG{SAMPLE_FLAG_TEXT}</code>. Flags are strictly <b>case-sensitive</b> and must include the outer <code>FLAG{...}</code> wrapper.", bullet_style))
     story.append(Spacer(1, 4))
-    story.append(Paragraph("<b>2. Anti-Brute-Force Rate Limiting:</b> Automated dictionary attacks, fuzzing, or rapid scripted submissions against the flag submission box trigger automatic IP and squad rate limiting (<b>maximum 10 attempts per 30 seconds</b>).", bullet_style))
+    story.append(Paragraph("<b>2. Anti-Brute-Force Rate Limiting:</b> Automated dictionary attacks, fuzzing, or rapid scripted submissions against the flag submission box trigger automatic IP rate limiting (<b>maximum 10 attempts per 30 seconds</b>).", bullet_style))
     story.append(Spacer(1, 4))
-    story.append(Paragraph("<b>3. Hint Transparency Policy:</b> Unlocking forensic hints deducts Cyber Coins permanently from your team's treasury. Hints are progressive (Tier 1: Investigative Angle → Tier 2: Specific Vector).", bullet_style))
+    story.append(Paragraph("<b>3. Hint Transparency Policy:</b> Unlocking forensic hints deducts Cyber Coins permanently from your individual treasury. Hints are progressive (Tier 1: Investigative Angle → Tier 2: Specific Vector).", bullet_style))
     story.append(Spacer(1, 4))
     story.append(Paragraph("<b>4. Deterministic Podium Tie-Breaking:</b> Standings are ranked automatically without arbitrary manual overrides using this strict priority cascade:", bullet_style))
     
     tie_breaker_text = (
         "&nbsp;&nbsp;&nbsp;&nbsp;<b>1. Total Forensic Points (Score)</b> — <i>Highest score ranks first</i><br/>"
         "&nbsp;&nbsp;&nbsp;&nbsp;<b>2. Normal Golden Stars Recovered</b> — <i>Most cases cleared ranks higher</i><br/>"
-        "&nbsp;&nbsp;&nbsp;&nbsp;<b>3. Mission Completion Status</b> — <i>Squads that breached the Boss Fortress rank above active squads</i><br/>"
+        "&nbsp;&nbsp;&nbsp;&nbsp;<b>3. Mission Completion Status</b> — <i>Investigators that breached the Boss Fortress rank above active participants</i><br/>"
         "&nbsp;&nbsp;&nbsp;&nbsp;<b>4. Total Elapsed Mission Time</b> — <i>Faster completion clock ranks higher</i><br/>"
         "&nbsp;&nbsp;&nbsp;&nbsp;<b>5. Timestamp of Final Solved Flag</b> — <i>Earlier server-recorded solve timestamp breaks final ties</i>"
     )
@@ -325,8 +325,8 @@ def build_rules_pdf(output_path="MARIO_CTF_OFFICIAL_RULES_AND_GUIDE.pdf"):
         Paragraph("<b>⚠️ PROHIBITED ACTIONS (ZERO TOLERANCE — IMMEDIATE DISQUALIFICATION)</b>", ParagraphStyle('WarnHead', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=9, textColor=colors.HexColor("#991B1B"))),
         Spacer(1, 4),
         Paragraph("• <b>Infrastructure Attacks:</b> Do NOT launch Denial-of-Service (DoS/DDoS) floods, SQL injection against platform endpoints, or port scans against the host server. All challenge exploitation is strictly confined to individual case workbenches.", ParagraphStyle('WarnB', parent=styles['Normal'], fontName='Helvetica', fontSize=8, leading=11.5, textColor=colors.HexColor("#7F1D1D"))),
-        Paragraph("• <b>Inter-Squad Collusion:</b> Sharing flags, private keys, solutions, or access codes with competing squads is strictly prohibited.", ParagraphStyle('WarnB', parent=styles['Normal'], fontName='Helvetica', fontSize=8, leading=11.5, textColor=colors.HexColor("#7F1D1D"))),
-        Paragraph("• <b>Account Hijacking:</b> Do NOT attempt to brute-force or use another team's Access Code or session credentials.", ParagraphStyle('WarnB', parent=styles['Normal'], fontName='Helvetica', fontSize=8, leading=11.5, textColor=colors.HexColor("#7F1D1D")))
+        Paragraph("• <b>Inter-Participant Collusion:</b> Sharing flags, private keys, solutions, or access codes with other participants is strictly prohibited. This is a 100% individual tournament.", ParagraphStyle('WarnB', parent=styles['Normal'], fontName='Helvetica', fontSize=8, leading=11.5, textColor=colors.HexColor("#7F1D1D"))),
+        Paragraph("• <b>Account Hijacking:</b> Do NOT attempt to brute-force or use another participant's Access Code or session credentials.", ParagraphStyle('WarnB', parent=styles['Normal'], fontName='Helvetica', fontSize=8, leading=11.5, textColor=colors.HexColor("#7F1D1D")))
     ]
     t_warning = Table([[warning_content]], colWidths=[523])
     t_warning.setStyle(TableStyle([
@@ -346,8 +346,8 @@ def build_rules_pdf(output_path="MARIO_CTF_OFFICIAL_RULES_AND_GUIDE.pdf"):
     story.append(Spacer(1, 4))
     
     checklist_rows = [
-        [Paragraph("☐", ParagraphStyle('Chk', fontName='Helvetica-Bold', fontSize=10, textColor=c_muted)), Paragraph("<b>Step 1 — Register Squad:</b> Open the tournament portal and click <b>'REGISTER SQUAD'</b>. Enter your team name.", body_style)],
-        [Paragraph("☐", ParagraphStyle('Chk', fontName='Helvetica-Bold', fontSize=10, textColor=c_muted)), Paragraph("<b>Step 2 — Distribute Access Code:</b> Copy your squad's cryptographic Access Code and share it with your teammates.", body_style)],
+        [Paragraph("☐", ParagraphStyle('Chk', fontName='Helvetica-Bold', fontSize=10, textColor=c_muted)), Paragraph("<b>Step 1 — Register Operative:</b> Open the tournament portal and enter your detective alias / name to register.", body_style)],
+        [Paragraph("☐", ParagraphStyle('Chk', fontName='Helvetica-Bold', fontSize=10, textColor=c_muted)), Paragraph("<b>Step 2 — Save Access Code:</b> Keep your personal Access Code safe to resume your session from any device.", body_style)],
         [Paragraph("☐", ParagraphStyle('Chk', fontName='Helvetica-Bold', fontSize=10, textColor=c_muted)), Paragraph("<b>Step 3 — Inspect 3D Map:</b> Review the Mission Briefing and begin investigation in Sector 01 (Mushroom Village).", body_style)],
         [Paragraph("☐", ParagraphStyle('Chk', fontName='Helvetica-Bold', fontSize=10, textColor=c_muted)), Paragraph("<b>Step 4 — Breach Bowser's Fortress:</b> Accumulate 11 Golden Stars to unlock Sector 05 and defeat the final boss!", body_style)]
     ]

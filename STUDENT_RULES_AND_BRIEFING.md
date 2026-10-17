@@ -39,24 +39,24 @@ The competition spans **5 progressive sectors** containing **12 forensic cases**
 * **11 Stars** are required to unlock the quantum firewall guarding Sector 05: Final Fortress.
 
 ### 3. 🪙 Cyber Coins & Hints
-* Every team starts with **100 Cyber Coins**.
+* Every investigator starts with **100 Cyber Coins**.
 * Solving challenges earns bonus coins.
 * **Interactive 3D ? Blocks:** Floating Question Mark blocks on the 3D World Map award extra coins when clicked!
-* **Hints:** If your squad gets stuck, you can spend Cyber Coins inside the challenge workbench to decrypt progressive forensic hints.
+* **Hints:** If you get stuck, you can spend Cyber Coins inside the challenge workbench to decrypt progressive forensic hints.
 
 ### 4. ⏱️ Competition Timer
 * An authoritative, tamper-proof competition timer tracks your mission runtime.
-* The timer starts when the tournament director gives the dispatch signal or upon your squad's first case engagement.
-* The clock automatically freezes the exact millisecond your squad successfully submits the Final Boss flag or clicks **Conclude Mission**.
+* The timer starts when the tournament director gives the dispatch signal or upon your first case engagement.
+* The clock automatically freezes the exact millisecond you successfully submit the Final Boss flag or click **Conclude Mission**.
 
 ---
 
-## 👥 Squad System (Team Collaboration)
+## 👤 Solo Operative System (Individual Competition)
 
-* **Multi-Member Squads:** Multiple teammates can work simultaneously from different laptops.
-* **Squad Access Code:** The team leader creates the squad and receives a unique cryptographic **Access Code** (e.g. `CYBER-W7KP-92RM`).
-* **Joining a Squad:** Teammates simply navigate to the portal, enter the Access Code, and join with their name.
-* **Shared State:** Solves, stars, coins, and hint unlocks update in real time across all squad members without race conditions.
+* **Individual Play:** This is a strictly **Solo / 1-vs-All** tournament. Every investigator competes independently on their own laptop or workstation.
+* **Personal Access Code:** When you register your detective alias, you receive a unique cryptographic **Access Code** (e.g. `OJAS-W7KP-92RM`).
+* **Session Portability:** If your browser closes, battery runs out, or you change workstations, simply enter your personal Access Code on the portal to resume your exact progress!
+* **Independent Score Ledger:** Your solved flags, recovered stars, cyber coins, and monotonic mission timer are tracked uniquely to your operative account.
 
 ---
 
@@ -70,18 +70,18 @@ The competition spans **5 progressive sectors** containing **12 forensic cases**
 * Flags are **case-sensitive** and must include the `FLAG{...}` wrapper unless explicitly noted in the challenge brief.
 
 ### 2. 🛡️ Anti-Brute-Force & Rate Limiting
-* Automated dictionary attacks or script-based brute forcing against the submission box will trigger an automatic rate-limit penalty (**maximum 10 submissions per 30 seconds** per squad).
+* Automated dictionary attacks or script-based brute forcing against the submission box will trigger an automatic rate-limit penalty (**maximum 10 submissions per 30 seconds** per participant).
 
 ### 3. 🛑 Prohibited Actions (Zero Tolerance — Immediate Disqualification)
 * **No attacking the platform:** Do NOT launch DoS/DDoS attacks, SQL injections, or port scans against the host server (`http://...`). All challenges provide self-contained sandboxes or downloadable evidence artifacts.
-* **No flag sharing:** Do NOT share flags, answers, access codes, or hints between different squads.
-* **No tampering with other squads:** Do NOT attempt to hijack other teams' sessions or access codes.
+* **No collusion or answer sharing:** Do NOT share flags, answers, access codes, or hints with any other participant. This is an individual 1-vs-All tournament.
+* **No tampering with other participants:** Do NOT attempt to hijack or use another investigator's session or access code.
 
 ### 4. ⚖️ Official Leaderboard Tie-Breaking Rules
 Rankings are determined deterministically using the following order:
 1. **Total Forensic Score (PTS)** — *Highest rank first*
 2. **Normal Golden Stars** — *Most stars cleared first*
-3. **Mission Completion Status** — *Squads that cleared the Boss Fortress rank above active squads*
+3. **Mission Completion Status** — *Investigators that cleared the Boss Fortress rank above active participants*
 4. **Total Elapsed Time** — *Faster completion time ranks higher*
 5. **Timestamp of Final Solve** — *Earlier submission timestamp breaks ties*
 
@@ -90,7 +90,7 @@ Rankings are determined deterministically using the following order:
 ## 🚀 Participant Checklist (How to Start)
 
 1. Open the game link provided by the organizers.
-2. Enter your **Squad Name** and your **Operative Name** to register.
-3. Save your **Squad Access Code** and share it with your team members so they can log in.
+2. Enter your **Investigator / Detective Alias** (e.g. `CyberViper` or your name) to register.
+3. Save your unique **Personal Access Code** (e.g. `OJAS-9K3M4X7P`) so you can resume your session anytime.
 4. Read the **Mission Briefing**, inspect the **3D World Map**, and begin with **Case 01** in Mushroom Village!
 5. Keep an eye on the **Live Leaderboard** and good luck recovering the Golden Star!

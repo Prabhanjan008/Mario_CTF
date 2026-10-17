@@ -31,7 +31,7 @@
             <thead>
                 <tr>
                     <th style="width: 80px;">RANK</th>
-                    <th>DETECTIVE SQUAD</th>
+                    <th>INVESTIGATOR / OPERATIVE</th>
                     <th>FORENSIC POINTS</th>
                     <th>GOLDEN STARS</th>
                     <th>CYBER COINS</th>
@@ -111,7 +111,7 @@
     const resetBtn = document.getElementById('leaderboard-reset-btn');
     if (resetBtn) {
         resetBtn.addEventListener('click', async () => {
-            if (!confirm("⚠️ HOST CONFIRMATION: Are you sure you want to completely RESET the leaderboard and all squad scores to 0?")) return;
+            if (!confirm("⚠️ HOST CONFIRMATION: Are you sure you want to completely RESET the leaderboard and all participant scores to 0?")) return;
             try {
                 const res = await fetch('/api/admin/reset', {
                     method: 'POST',

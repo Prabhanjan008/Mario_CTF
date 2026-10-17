@@ -43,7 +43,7 @@
                     {% endif %}
                 </h1>
                 <p style="color: #9bb4db; font-size: 0.95rem; margin: 0;">
-                    Lead Investigator: <strong style="color: #fff; font-family: var(--font-heading);">{{ team.team_name }}</strong> • Squad Access Code: <code style="color: var(--cyber-cyan); background: rgba(0,240,255,0.1); padding: 2px 6px; border-radius: 4px;">{{ team.access_code }}</code>
+                    Investigator: <strong style="color: #fff; font-family: var(--font-heading);">{{ team.team_name }}</strong> • Personal Access Code: <code style="color: var(--cyber-cyan); background: rgba(0,240,255,0.1); padding: 2px 6px; border-radius: 4px;">{{ team.access_code }}</code>
                 </p>
             </div>
             <div style="text-align: right;">
@@ -75,7 +75,7 @@
                     #{{ rank }}
                 </div>
                 <div style="font-size: 0.8rem; color: #6e87b5;">
-                    Out of {{ total_teams }} competing squads
+                    Out of {{ total_teams }} competing investigators
                 </div>
             </div>
 
@@ -174,7 +174,7 @@
             </div>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <a href="{{ url_for('game.briefing') }}" class="btn-secondary">
-                    📋 SQUAD DISPATCH
+                    📋 INVESTIGATOR TERMINAL
                 </a>
                 <a href="{{ url_for('game.index', home=1) }}" class="btn-secondary">
                     🏠 TITLE SCREEN

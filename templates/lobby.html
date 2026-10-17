@@ -151,17 +151,17 @@
         </div>
 
         <h1 style="font-family: var(--font-heading); font-size: 2rem; color: #fff; margin-bottom: 8px; text-transform: uppercase;">
-            {{ team.team_name if team else 'Investigator Squad' }}
+            {{ team.team_name if team else 'Investigator Operative' }}
         </h1>
         <p style="color: #8da4d0; font-size: 0.95rem; max-width: 650px; margin: 0 auto 16px;">
-            Your squad is officially registered for <strong>Chanakya University • OJAS Tech Fest 2026</strong>. Central Command is calibrating the cyber sectors. Stand by!
+            You are officially registered for <strong>Chanakya University • OJAS Tech Fest 2026</strong>. Central Command is calibrating the cyber sectors. Stand by!
         </p>
 
         <!-- Access Code Share Box -->
         {% if team %}
         <div>
             <div style="font-size: 0.8rem; color: #8da4d0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">
-                SHARE THIS ACCESS CODE WITH YOUR TEAMMATES:
+                YOUR PERSONAL ACCESS CODE (SAVE TO RESUME ANYTIME):
             </div>
             <div class="code-box">
                 <code id="squad-access-code" style="font-size: 1.6rem; color: var(--cyber-gold); font-weight: bold; letter-spacing: 2px;">
@@ -172,14 +172,14 @@
                 </button>
             </div>
             <div id="copy-confirm" style="color: var(--cyber-green); font-size: 0.82rem; height: 18px; margin-top: -16px; margin-bottom: 12px; opacity: 0; transition: opacity 0.2s;">
-                ✅ Code copied to clipboard! Share it with your squad.
+                ✅ Code copied to clipboard! Save it to resume your session anytime.
             </div>
         </div>
 
-        <!-- Squad Roster -->
+        <!-- Investigator Profile -->
         <div style="margin-top: 10px;">
             <div style="font-size: 0.8rem; color: #8da4d0; margin-bottom: 8px; font-weight: bold;">
-                CONNECTED SQUAD AGENTS:
+                ACTIVE INVESTIGATOR:
             </div>
             <div id="squad-members-list">
                 {% if members %}
@@ -187,25 +187,25 @@
                     <span class="member-pill">🕵️ {{ m }}</span>
                     {% endfor %}
                 {% else %}
-                    <span class="member-pill">🕵️ Agent</span>
+                    <span class="member-pill">🕵️ Operative</span>
                 {% endif %}
             </div>
         </div>
         {% endif %}
 
-        <!-- Connected Squads Counter -->
+        <!-- Connected Operatives Counter -->
         <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;">
             <div>
                 <div style="font-size: 1.8rem; font-family: var(--font-heading); color: var(--cyber-cyan);" id="stat-total-teams">
                     {{ comp.total_teams if comp else 0 }}
                 </div>
-                <div style="font-size: 0.75rem; color: #8da4d0;">SQUADS IN STANDBY</div>
+                <div style="font-size: 0.75rem; color: #8da4d0;">INVESTIGATORS IN STANDBY</div>
             </div>
             <div>
                 <div style="font-size: 1.8rem; font-family: var(--font-heading); color: var(--cyber-green);" id="stat-total-members">
                     {{ comp.total_members if comp else 0 }}
                 </div>
-                <div style="font-size: 0.75rem; color: #8da4d0;">STUDENT INVESTIGATORS</div>
+                <div style="font-size: 0.75rem; color: #8da4d0;">REGISTERED COMPETITORS</div>
             </div>
             <div>
                 <div style="font-size: 1.8rem; font-family: var(--font-heading); color: var(--cyber-gold);" id="stat-competition-mode">
@@ -215,10 +215,10 @@
             </div>
         </div>
 
-        <!-- Fast Link to Switch Squad -->
+        <!-- Fast Link to Switch Profile -->
         <div style="margin-top: 24px;">
             <a href="{{ url_for('game.briefing') }}" style="color: #8da4d0; font-size: 0.82rem; text-decoration: underline;">
-                Switch Squad or Register Another Team 🔄
+                Switch Operative or Register Profile 🔄
             </a>
         </div>
     </div>
@@ -229,8 +229,8 @@
             📜 RULES OF ENGAGEMENT // OJAS 2026 CTF
         </h3>
         <ul style="color: #8da4d0; font-size: 0.88rem; line-height: 1.7; padding-left: 20px; margin: 0;">
-            <li><strong>Authoritative Timer:</strong> The mission clock will start synchronously for all squads the instant the Host issues the launch command.</li>
-            <li><strong>Squad Synchronization:</strong> Points, unlocked hints, and stars are shared across all teammates in real-time.</li>
+            <li><strong>Authoritative Timer:</strong> The mission clock will start synchronously for all investigators the instant the Host issues the launch command.</li>
+            <li><strong>Individual Integrity:</strong> Points, unlocked hints, and stars are tracked exclusively to your personal operative profile.</li>
             <li><strong>Star Gating:</strong> Solve cases to earn stars. Sector 02 unlocks at 2 stars, Sector 03 at 5 stars, Sector 04 at 8 stars, and the Final Boss at 11 stars.</li>
             <li><strong>Anti-Brute-Force:</strong> Rapid spamming of incorrect flags triggers a progressive timeout. Analyze artifacts carefully!</li>
             <li><strong>Automatic Warp:</strong> Keep this page open. As soon as the Host clicks <em>"Start Game"</em>, your screen will automatically launch into the 3D Cyber Map!</li>
