@@ -23,7 +23,7 @@ The competition spans **5 progressive sectors** containing **12 forensic cases**
 | **02** | **Dark Forest** | Web Exploitation, Hash Cracking & Rainbow Tables, XSS Sanitization | **2 ⭐** |
 | **03** | **Haunted Mansion** | Python Bytecode Reverse Engineering, Buffer Overflow, Firmware Forensics | **5 ⭐** |
 | **04** | **Koopa HQ** | JWT Secret Forgery, Insecure AWS S3 Cloud Bucket Enumeration | **8 ⭐** |
-| **05** | **Final Fortress** | **Three-Stage Boss Showdown** (Sector Shields → Trivia → Master Flag) | **11 ⭐** |
+| **05** | **Final Fortress** | **Boss Showdown** (Shatter 4 Sector Shields → Extract Master Flag) | **11 ⭐** |
 
 ---
 

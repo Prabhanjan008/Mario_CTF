@@ -234,7 +234,7 @@ def build_rules_pdf(output_path="MARIO_CTF_OFFICIAL_RULES_AND_GUIDE.pdf"):
         [
             Paragraph("<b>05</b>", table_bold_style),
             Paragraph("<b>Final Fortress</b>", table_bold_style),
-            Paragraph("<b>Three-Stage Boss Showdown:</b> Phase 1 (4 Sector Shields) → Phase 2 (Cyber Trivia) → Phase 3 (Master Flag).", table_body_style),
+            Paragraph("<b>Boss Showdown:</b> Shatter 4 Sector Shields → Synthesize & Extract Master Champion Flag.", table_body_style),
             Paragraph("<font color='#DC2626'><b>11 ⭐ Required</b></font>", table_body_style)
         ]
     ]

@@ -209,7 +209,7 @@ Below is the complete walkthrough, exact flag, and step-by-step forensic procedu
 - **Points:** 500 PTS | **Rewards:** +2 ⭐, +300 🪙
 - **EXACT MASTER FLAG:** `FLAG{GOLDEN_STAR_RESTORED_OJAS_CHAMPION}`
 
-##### Stage 1: 4 Quantum Shield Overrides (Sector Keywords)
+##### 4 Quantum Shield Override Answers (Sector Keywords):
 1. **Shield 1 (Sector 01: Mushroom Village)**:
    - *Question:* Secret keyword inside HTML comment on village board in Case 1?
    - **Answer:** `SECRET`
@@ -225,31 +225,14 @@ Below is the complete walkthrough, exact flag, and step-by-step forensic procedu
 
 ---
 
-##### Stage 2: Cognitive Protocol (Cybersecurity Knowledge Check)
-*Unlocks automatically once all 4 Stage 1 shields are neutralized.*
-
-1. **Query 01 (Networking / Port Scanner)**:
-   - *Question:* What standard cybersecurity CLI utility is used for network port scanning, host discovery, and OS fingerprinting? (Clue: 4-letter port scanner by Gordon Lyon)
-   - **Exact Answer:** `NMAP`
-2. **Query 02 (Encoding / Base64 Padding)**:
-   - *Question:* What special single padding character is appended to the end of a Base64 encoded payload when the input byte count is not divisible by 3? (Clue: Mathematical assignment symbol)
-   - **Exact Answer:** `=`
-3. **Query 03 (Cryptography / Federal Standard)**:
-   - *Question:* What symmetric block cipher algorithm (128, 192, or 256 bits) was established as the US federal encryption standard by NIST in 2001? (Clue: 3-letter acronym replacing DES)
-   - **Exact Answer:** `AES` (or `ADVANCED ENCRYPTION STANDARD`)
-4. **Query 04 (Binary Exploitation / Memory Corruption)**:
-   - *Question:* What critical memory safety vulnerability occurs when a program writes more data to a memory buffer than was allocated, potentially corrupting the execution stack? (Clue: Classic memory-corruption flaw)
-   - **Exact Answer:** `BUFFER OVERFLOW` (or `STACK OVERFLOW`)
-
----
-
-##### Stage 3: Master Vault Extraction (Final Victory)
-1. When all 4 Stage 2 queries are verified (`VERIFIED ✅`), the quantum core vault opens.
-2. The synthesized Master Flag automatically populates into the submission terminal:
+##### Completing the Showdown & Flag Reveal:
+1. Type each answer into its respective shield input and click **CRACK ⚡** (or press `Enter`).
+2. Each cracked shield shatters in the 3D WebGL scene and turns green `NEUTRALIZED ✅`.
+3. The instant all 4 shields are neutralized, Mecha-Shellshock powers down, the Golden Star drops, and the synthesized Master Flag **automatically appears in a glowing banner and populates directly into the submission box**:
    `FLAG{GOLDEN_STAR_RESTORED_OJAS_CHAMPION}`
-3. Click **[ 🌟 SUBMIT MASTER FLAG ]**.
-4. The competition timer freezes and locks for the participant.
-5. The **[ 🏆 PROCEED TO OFFICIAL VICTORY CEREMONY ]** button unlocks, leading to `/victory` with fireworks, 8-bit fanfare music, and the Official Champion Diploma!
+4. Click **[ 🌟 SUBMIT MASTER FLAG ]**.
+5. The competition timer freezes and locks for the participant.
+6. The **[ 🏆 PROCEED TO OFFICIAL VICTORY CEREMONY ]** button unlocks, leading to `/victory` with fireworks, 8-bit fanfare music, and the Official Champion Diploma!
 
 ---
 

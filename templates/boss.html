@@ -30,19 +30,16 @@
                 {% if challenge.is_solved %}
                     DEFENSES OFFLINE // ALL 4 SHIELD RINGS NEUTRALIZED // GOLDEN STAR RESTORED
                 {% else %}
-                    THREE-STAGE SHOWDOWN: SHIELDS (STAGE 1) ➔ KNOWLEDGE CHECK (STAGE 2) ➔ MASTER FLAG (STAGE 3)
+                    FINAL SHOWDOWN: SHATTER 4 SECTOR SHIELDS ➔ EXTRACT MASTER FLAG
                 {% endif %}
             </div>
         </div>
         <div style="position: absolute; top: 16px; right: 20px; z-index: 10; display: flex; gap: 8px;">
             <span id="stage-indicator-1" class="badge-tag {{ 'badge-diff-easy' if boss_data.progress.stage1_complete else 'badge-diff-expert' }}">
-                STAGE 1: {{ 'SHIELDS CLEARED' if boss_data.progress.stage1_complete else 'SHIELD BYPASS' }}
+                SHIELDS: {{ 'CLEARED (4/4)' if boss_data.progress.stage1_complete else '4 ACTIVE' }}
             </span>
-            <span id="stage-indicator-2" class="badge-tag {{ 'badge-diff-easy' if boss_data.progress.stage2_complete else ('badge-category' if boss_data.progress.stage1_complete else 'badge-diff-hard') }}">
-                STAGE 2: {{ 'TRIVIA CLEARED' if boss_data.progress.stage2_complete else 'KNOWLEDGE CHECK' }}
-            </span>
-            <span id="stage-indicator-3" class="badge-tag {{ 'badge-diff-easy' if challenge.is_solved else 'badge-diff-hard' }}">
-                STAGE 3: {{ 'VICTORY' if challenge.is_solved else 'CORE EXTRACTION' }}
+            <span id="stage-indicator-3" class="badge-tag {{ 'badge-diff-easy' if challenge.is_solved else ('badge-category' if boss_data.progress.stage1_complete else 'badge-diff-hard') }}">
+                VAULT: {{ 'RECOVERED' if challenge.is_solved else ('OPEN' if boss_data.progress.stage1_complete else 'LOCKED') }}
             </span>
         </div>
     </div>
@@ -173,76 +170,45 @@
         </div>
     </div>
 
-    <!-- STAGE 2: CYBERSECURITY KNOWLEDGE CHECK -->
-    <div class="cyber-card" id="boss-stage-2-card" style="margin-bottom: 24px; {% if not boss_data.progress.stage1_complete %}opacity: 0.6;{% endif %}">
+    <!-- MASTER VAULT CORE & FLAG EXTRACTION -->
+    <div class="cyber-card" id="boss-stage-3-card" style="{% if not boss_data.progress.stage1_complete and not challenge.is_solved %}opacity: 0.6;{% endif %}">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
             <div>
-                <span class="badge-tag badge-category">STAGE 2 // COGNITIVE PROTOCOL</span>
-                <h3 class="card-title" style="margin-top: 6px; margin-bottom: 0;">🧠 CYBERSECURITY KNOWLEDGE CHECK</h3>
-            </div>
-            <div id="stage2-progress-pill" class="badge-tag {{ 'badge-diff-easy' if boss_data.progress.stage2_complete else ('badge-category' if boss_data.progress.stage1_complete else 'badge-diff-hard') }}">
-                {% if boss_data.progress.stage2_complete %}
-                    STAGE 2 COMPLETE (4/4 VERIFIED)
-                {% elif boss_data.progress.stage1_complete %}
-                    STAGE 2 ACTIVE // ANSWER ALL 4 QUESTIONS
-                {% else %}
-                    🔒 LOCKED // NEUTRALIZE STAGE 1 SHIELDS FIRST
-                {% endif %}
-            </div>
-        </div>
-        <p style="color: #9ab0d4; font-size: 0.9rem; margin-bottom: 20px;">
-            Mecha-Shellshock's core subroutines demand verification of fundamental cybersecurity concepts before the vault core opens.
-        </p>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            {% for q_num, q_info in boss_data.stage2_questions.items() %}
-            <div class="override-terminal-card" style="background: rgba(0, 240, 255, 0.03); border: 1px solid rgba(0, 240, 255, 0.25); padding: 16px; border-radius: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span style="font-family: var(--font-heading); font-size: 0.85rem; color: var(--cyber-cyan); font-weight: bold;">
-                        QUERY 0{{ q_num }}: PROTOCOL VERIFICATION
-                    </span>
-                    <span id="boss-trivia-status-{{ q_num }}" class="badge-tag {{ 'badge-diff-easy' if q_info.is_solved else 'badge-diff-hard' }}" style="font-size: 0.72rem;">
-                        {{ 'VERIFIED ✅' if q_info.is_solved else 'PENDING 🔒' }}
-                    </span>
-                </div>
-                <p style="font-size: 0.85rem; color: #d0e0ff; margin-bottom: 8px; line-height: 1.4;">
-                    {{ q_info.question }}
-                </p>
-                <div style="font-size: 0.75rem; color: #8da4d0; margin-bottom: 10px; font-style: italic;">
-                    💡 Clue: {{ q_info.hint }}
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <input id="boss-trivia-input-{{ q_num }}" type="text" class="flag-input" placeholder="Type answer..." {{ 'disabled' if (q_info.is_solved or not boss_data.progress.stage1_complete) else '' }} style="padding: 9px 12px; font-size: 0.88rem;">
-                    <button id="boss-trivia-btn-{{ q_num }}" class="btn-secondary" {{ 'disabled' if (q_info.is_solved or not boss_data.progress.stage1_complete) else '' }} style="padding: 9px 16px; white-space: nowrap;">
-                        {{ 'VERIFIED' if q_info.is_solved else 'VERIFY 🔍' }}
-                    </button>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- STAGE 3: CORE MASTER FLAG EXTRACTION -->
-    <div class="cyber-card" id="boss-stage-3-card" style="{% if not boss_data.progress.stage2_complete and not challenge.is_solved %}opacity: 0.6;{% endif %}">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
-            <div>
-                <span class="badge-tag badge-diff-expert">STAGE 3 // MASTER CORE</span>
+                <span class="badge-tag badge-diff-expert">FINAL STAGE // MASTER CORE</span>
                 <h3 class="card-title" style="margin-top: 6px; margin-bottom: 0;">🌟 MASTER VAULT EXTRACTION</h3>
             </div>
-            <div id="stage3-progress-pill" class="badge-tag {{ 'badge-diff-easy' if challenge.is_solved else ('badge-category' if boss_data.progress.stage2_complete else 'badge-diff-hard') }}">
+            <div id="stage3-progress-pill" class="badge-tag {{ 'badge-diff-easy' if challenge.is_solved else ('badge-category' if boss_data.progress.stage1_complete else 'badge-diff-hard') }}">
                 {% if challenge.is_solved %}
                     GOLDEN STAR SECURED ✅
-                {% elif boss_data.progress.stage2_complete %}
+                {% elif boss_data.progress.stage1_complete %}
                     VAULT CORE OPEN // READY FOR EXTRACTION
                 {% else %}
-                    🔒 LOCKED // COMPLETE STAGE 1 & 2 FIRST
+                    🔒 LOCKED // NEUTRALIZE ALL 4 SHIELDS FIRST
                 {% endif %}
             </div>
         </div>
 
         {% if not challenge.is_solved %}
-        <p style="color: #b0c4e8; font-size: 0.92rem; margin-bottom: 16px; line-height: 1.5;">
-            Once all 4 perimeter shields are shattered and the cognitive protocols are satisfied, submit the final Champion Flag to recover the Golden Star and freeze your competition clock!
+        <!-- Glowing Banner when All 4 Shields are Cracked -->
+        <div id="master-flag-reveal-card" style="background: rgba(0, 255, 102, 0.08); border: 2px solid var(--cyber-green); border-radius: 8px; padding: 18px 20px; margin-bottom: 20px; box-shadow: 0 0 25px rgba(0, 255, 102, 0.15); {% if not boss_data.progress.stage1_complete %}display: none;{% endif %}">
+            <div style="font-family: var(--font-heading); color: var(--cyber-green); font-size: 1.05rem; font-weight: bold; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                🎉 ALL 4 QUANTUM SHIELDS SHATTERED! GOLDEN STAR VAULT UNLOCKED!
+            </div>
+            <p style="color: #c0d4f4; font-size: 0.92rem; margin-bottom: 12px; line-height: 1.5;">
+                Mecha-Shellshock has powered down and the Master Golden Star has dropped! The synthesized Champion recovery flag is revealed below:
+            </p>
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <code id="revealed-flag-text" style="font-size: 1.2rem; font-family: monospace; color: var(--cyber-gold); background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 6px; border: 1px solid var(--cyber-gold); letter-spacing: 1px; font-weight: bold;">
+                    FLAG{GOLDEN_STAR_RESTORED_OJAS_CHAMPION}
+                </code>
+                <button type="button" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="copyMasterFlag()">
+                    📋 COPY FLAG
+                </button>
+            </div>
+        </div>
+
+        <p id="shield-pending-hint" style="color: #b0c4e8; font-size: 0.92rem; margin-bottom: 16px; line-height: 1.5; {% if boss_data.progress.stage1_complete %}display: none;{% endif %}">
+            Neutralize all 4 perimeter shields above to break Bowser's mainframe defenses and reveal the final Golden Star Champion Flag!
         </p>
 
         <form id="flag-form" class="flag-form" style="max-width: 680px;">
@@ -250,8 +216,8 @@
                 MASTER RECOVERY FLAG SUBMISSION TERMINAL:
             </label>
             <div style="display: flex; gap: 10px; margin-top: 6px;">
-                <input id="flag-input" type="text" class="flag-input" placeholder="FLAG{...}" data-challenge-id="12" autocomplete="off" {{ 'disabled' if not boss_data.progress.stage2_complete else '' }} style="flex: 1; font-size: 1rem; padding: 12px 14px;">
-                <button id="flag-submit-btn" type="submit" class="btn-primary" {{ 'disabled' if not boss_data.progress.stage2_complete else '' }} style="padding: 12px 24px; white-space: nowrap; font-size: 1rem;">
+                <input id="flag-input" type="text" class="flag-input" placeholder="FLAG{...}" data-challenge-id="12" autocomplete="off" value="{{ 'FLAG{GOLDEN_STAR_RESTORED_OJAS_CHAMPION}' if boss_data.progress.stage1_complete else '' }}" {{ 'disabled' if not boss_data.progress.stage1_complete else '' }} style="flex: 1; font-size: 1rem; padding: 12px 14px; font-weight: bold; color: var(--cyber-gold);">
+                <button id="flag-submit-btn" type="submit" class="btn-primary" {{ 'disabled' if not boss_data.progress.stage1_complete else '' }} style="padding: 12px 24px; white-space: nowrap; font-size: 1rem; background: linear-gradient(135deg, var(--cyber-gold), #b38600);">
                     🌟 SUBMIT MASTER FLAG
                 </button>
             </div>

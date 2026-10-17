@@ -364,7 +364,7 @@ function initBossOverrides() {
                         if (window.soundFx) window.soundFx.playPowerup();
 
                         if (data.stage1_complete) {
-                            unlockBossStage2();
+                            unlockBossVault(data.flag);
                         }
                     } else {
                         btn.disabled = false;
@@ -400,14 +400,27 @@ function initBossOverrides() {
             });
         }
     }
+
+    // Auto-unlock vault on load if all 4 shields are already neutralized
+    const allCracked = [1, 2, 3, 4].every(idx => {
+        const status = document.getElementById(`boss-override-status-${idx}`);
+        return status && status.innerText.includes('NEUTRALIZED');
+    });
+    if (allCracked) {
+        unlockBossVault();
+    }
 }
 
-function unlockBossStage2() {
+function unlockBossVault(flag) {
     const s1Pill = document.getElementById('stage1-progress-pill');
-    const s2Pill = document.getElementById('stage2-progress-pill');
     const s1Ind = document.getElementById('stage-indicator-1');
-    const s2Ind = document.getElementById('stage-indicator-2');
-    const s2Card = document.getElementById('boss-stage-2-card');
+    const s3Ind = document.getElementById('stage-indicator-3');
+    const s3Pill = document.getElementById('stage3-progress-pill');
+    const s3Card = document.getElementById('boss-stage-3-card');
+    const revealCard = document.getElementById('master-flag-reveal-card');
+    const pendingHint = document.getElementById('shield-pending-hint');
+    const flagInput = document.getElementById('flag-input');
+    const flagBtn = document.getElementById('flag-submit-btn');
 
     if (s1Pill) {
         s1Pill.className = "badge-tag badge-diff-easy";
@@ -415,143 +428,69 @@ function unlockBossStage2() {
     }
     if (s1Ind) {
         s1Ind.className = "badge-tag badge-diff-easy";
-        s1Ind.innerText = "STAGE 1: SHIELDS CLEARED";
+        s1Ind.innerText = "SHIELDS: CLEARED (4/4)";
     }
-    if (s2Pill) {
-        s2Pill.className = "badge-tag badge-category";
-        s2Pill.innerText = "STAGE 2 ACTIVE // ANSWER ALL 4 QUESTIONS";
-    }
-    if (s2Ind) {
-        s2Ind.className = "badge-tag badge-category";
-    }
-    if (s2Card) {
-        s2Card.style.opacity = "1";
-    }
-
-    for (let q = 1; q <= 4; q++) {
-        const inp = document.getElementById(`boss-trivia-input-${q}`);
-        const btn = document.getElementById(`boss-trivia-btn-${q}`);
-        const stat = document.getElementById(`boss-trivia-status-${q}`);
-        if (inp && btn && (!stat || !stat.innerText.includes('VERIFIED'))) {
-            inp.disabled = false;
-            btn.disabled = false;
-        }
-    }
-}
-
-function initBossTrivia() {
-    for (let q = 1; q <= 4; q++) {
-        const btn = document.getElementById(`boss-trivia-btn-${q}`);
-        const input = document.getElementById(`boss-trivia-input-${q}`);
-        const status = document.getElementById(`boss-trivia-status-${q}`);
-
-        if (btn && input) {
-            const handleVerify = async () => {
-                if (btn.disabled) return;
-                const val = input.value.trim();
-                if (!val) return;
-
-                btn.disabled = true;
-                btn.innerText = "CHECKING...";
-
-                try {
-                    const res = await fetch('/api/boss/submit-trivia', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': (window.getCsrfToken ? window.getCsrfToken() : '')
-                        },
-                        body: JSON.stringify({ q_num: q, answer: val })
-                    });
-                    const data = await res.json();
-
-                    if (data.success) {
-                        if (status) {
-                            status.className = "badge-tag badge-diff-easy";
-                            status.innerHTML = "VERIFIED ✅";
-                        }
-                        btn.disabled = true;
-                        btn.innerText = "VERIFIED";
-                        input.disabled = true;
-
-                        if (window.soundFx) window.soundFx.playPowerup();
-
-                        if (data.stage2_complete) {
-                            unlockBossStage3();
-                        }
-                    } else {
-                        btn.disabled = false;
-                        btn.innerText = "VERIFY 🔍";
-                        if (status) {
-                            status.className = "badge-tag badge-diff-hard";
-                            status.innerHTML = "FAILED ❌";
-                        }
-                        if (window.soundFx) window.soundFx.playError();
-                        setTimeout(() => {
-                            if (!btn.disabled && status) {
-                                status.className = "badge-tag badge-diff-hard";
-                                status.innerHTML = "PENDING 🔒";
-                            }
-                        }, 2500);
-                    }
-                } catch (e) {
-                    btn.disabled = false;
-                    btn.innerText = "VERIFY 🔍";
-                    if (status) {
-                        status.className = "badge-tag badge-diff-hard";
-                        status.innerHTML = "ERROR ⚠️";
-                    }
-                }
-            };
-
-            btn.addEventListener('click', handleVerify);
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleVerify();
-                }
-            });
-        }
-    }
-}
-
-function unlockBossStage3() {
-    const s2Pill = document.getElementById('stage2-progress-pill');
-    const s3Pill = document.getElementById('stage3-progress-pill');
-    const s2Ind = document.getElementById('stage-indicator-2');
-    const s3Ind = document.getElementById('stage-indicator-3');
-    const s3Card = document.getElementById('boss-stage-3-card');
-    const flagInput = document.getElementById('flag-input');
-    const flagBtn = document.getElementById('flag-submit-btn');
-
-    if (s2Pill) {
-        s2Pill.className = "badge-tag badge-diff-easy";
-        s2Pill.innerText = "STAGE 2 COMPLETE (4/4 VERIFIED)";
-    }
-    if (s2Ind) {
-        s2Ind.className = "badge-tag badge-diff-easy";
-        s2Ind.innerText = "STAGE 2: TRIVIA CLEARED";
+    if (s3Ind) {
+        s3Ind.className = "badge-tag badge-diff-easy";
+        s3Ind.innerText = "VAULT: OPEN";
     }
     if (s3Pill) {
         s3Pill.className = "badge-tag badge-category";
         s3Pill.innerText = "VAULT CORE OPEN // READY FOR EXTRACTION";
     }
-    if (s3Ind) {
-        s3Ind.className = "badge-tag badge-category";
-    }
     if (s3Card) {
         s3Card.style.opacity = "1";
     }
+    if (revealCard) {
+        revealCard.style.display = "block";
+    }
+    if (pendingHint) {
+        pendingHint.style.display = "none";
+    }
+
+    const finalFlag = flag || "FLAG{GOLDEN_STAR_RESTORED_OJAS_CHAMPION}";
+    const revealedFlagText = document.getElementById('revealed-flag-text');
+    if (revealedFlagText) {
+        revealedFlagText.innerText = finalFlag;
+    }
+
     if (flagInput) {
+        flagInput.value = finalFlag;
         flagInput.disabled = false;
         flagInput.focus();
     }
     if (flagBtn) {
         flagBtn.disabled = false;
     }
+
+    if (window.bossSceneInstance) {
+        window.bossSceneInstance.triggerDefeat();
+    }
     if (window.soundFx) {
         window.soundFx.playVictory();
     }
+}
+
+window.copyMasterFlag = function() {
+    const code = document.getElementById('revealed-flag-text')?.innerText.trim() || "FLAG{GOLDEN_STAR_RESTORED_OJAS_CHAMPION}";
+    const flagInput = document.getElementById('flag-input');
+    if (flagInput) {
+        flagInput.value = code;
+        flagInput.focus();
+    }
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(code).then(() => {
+            alert("✅ Master Flag copied to clipboard! It is already populated in the submission terminal below.");
+        }).catch(() => {
+            alert("✅ Master Flag is ready in the submission terminal below!");
+        });
+    } else {
+        alert("✅ Master Flag is ready in the submission terminal below!");
+    }
+};
+
+function initBossTrivia() {
+    // Stage 2 trivia was deprecated; no-op preserved for backwards compatibility
 }
 
 function applyCaesar(str, shift) {

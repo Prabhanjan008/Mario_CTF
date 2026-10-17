@@ -88,6 +88,7 @@ def get_boss_status(team_id: int) -> dict:
             "required_stars": BOSS_REQUIRED_STARS,
             "progress": bp.to_dict(),
             "stage2_questions": questions_meta,
+            "flag": FINAL_BOSS_FLAG if bp.stage1_completed else None,
             "run_info": get_team_run_info(team)
         }
 
@@ -144,6 +145,7 @@ def submit_stage1_shield(team_id: int, shield_num: int, keycode: str, ip: str = 
         )
         if all_shields:
             bp.stage1_completed = True
+            bp.stage2_completed = True  # Automatically satisfy Stage 2 so Master Flag unlocks directly
 
         audit = AuditLog(
             team_id=team.id,
@@ -160,6 +162,8 @@ def submit_stage1_shield(team_id: int, shield_num: int, keycode: str, ip: str = 
             "shield_num": shield_num,
             "stage1_completed": bp.stage1_completed,
             "stage1_complete": bp.stage1_completed,
+            "stage2_complete": bp.stage2_completed,
+            "flag": FINAL_BOSS_FLAG if bp.stage1_completed else None,
             "progress": bp.to_dict()
         }
 
@@ -257,12 +261,6 @@ def submit_stage3_final_flag(team_id: int, flag_attempt: str, ip: str = None) ->
             return {
                 "success": False,
                 "message": "Security Sequence Error: Stage 1 Quantum Shields are still active!"
-            }
-
-        if not bp.stage2_completed:
-            return {
-                "success": False,
-                "message": "Security Sequence Error: Stage 2 Core Trivia questions are not fully verified!"
             }
 
         # Check if already completed

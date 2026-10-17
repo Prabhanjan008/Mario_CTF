@@ -330,17 +330,10 @@ def test_three_stage_boss_sequential_progression():
     s4 = submit_stage1_shield(team_id, 4, "INSIDER")
     assert s1["success"] and s2["success"] and s3["success"] and s4["success"]
     assert s4["stage1_complete"] is True
+    assert s4.get("flag") == "FLAG{GOLDEN_STAR_RESTORED_OJAS_CHAMPION}"
 
-    # Solve Stage 2: 4 cybersecurity trivia answers
-    t1 = submit_stage2_trivia(team_id, 1, "nmap")
-    t2 = submit_stage2_trivia(team_id, 2, "=")
-    t3 = submit_stage2_trivia(team_id, 3, "AES")
-    t4 = submit_stage2_trivia(team_id, 4, "Buffer Overflow")
-    assert t1["success"] and t2["success"] and t3["success"] and t4["success"]
-    assert t4["stage2_complete"] is True
-
-    # Solve Stage 3: Master Recovery Flag
-    final = submit_stage3_final_flag(team_id, "FLAG{GOLDEN_STAR_RESTORED_OJAS_CHAMPION}")
+    # Solve Stage 3: Master Recovery Flag directly without trivia requirement
+    final = submit_stage3_final_flag(team_id, s4["flag"])
     assert final["success"] is True
     assert final["is_finished"] is True
 
