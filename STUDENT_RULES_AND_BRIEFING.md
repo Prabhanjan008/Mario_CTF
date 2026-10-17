@@ -1,0 +1,96 @@
+# 🍄 MARIO: THE CYBER HEIST
+### OJAS Tech Fest 2026 — Official Cybersecurity CTF Briefing & Rules
+
+Welcome, Investigators! You have been recruited by the Mushroom Kingdom Cyber Incident Response Team (MK-CIRT) to investigate the kingdom’s greatest security breach.
+
+---
+
+## 📖 Mission Background & Objective
+
+At **03:14:07 AM**, the Master Sanctum vault security perimeter collapsed. The kingdom’s core power source, **THE GOLDEN STAR**, was forcibly exfiltrated by a rogue cyber syndicate operating under the alias **`PHANTOM_SHROOM`**.
+
+Your objective is to navigate the **Interactive 3D World Map**, analyze forensic evidence across 4 compromised sectors, crack cryptographic ciphers, breach firewalls, and infiltrate Bowser’s Final Fortress to recover the Golden Star.
+
+---
+
+## 🗺️ Sector Progression & World Map
+
+The competition spans **5 progressive sectors** containing **12 forensic cases**:
+
+| Sector | World Name | Category Focus | Required Stars |
+| :---: | :--- | :--- | :---: |
+| **01** | **Mushroom Village** | Digital Forensics, PCAP Packet Analysis, Linux Permissions | **0 ⭐ (Unlocked)** |
+| **02** | **Dark Forest** | Web Exploitation, Hash Cracking & Rainbow Tables, XSS Sanitization | **2 ⭐** |
+| **03** | **Haunted Mansion** | Python Bytecode Reverse Engineering, Buffer Overflow, Firmware Forensics | **5 ⭐** |
+| **04** | **Koopa HQ** | JWT Secret Forgery, Insecure AWS S3 Cloud Bucket Enumeration | **8 ⭐** |
+| **05** | **Final Fortress** | **Three-Stage Boss Showdown** (Sector Shields → Trivia → Master Flag) | **11 ⭐** |
+
+---
+
+## 🎮 Game Mechanics & Scoring Economy
+
+### 1. 🏆 Forensic Points (Score)
+* Each solved case awards points (ranging from **100 to 500 PTS** based on difficulty).
+* Points determine your ranking on the **Live Leaderboard**.
+
+### 2. ⭐ Golden Stars
+* Every standard forensic case (Cases 1–11) cleared awards **1 Golden Star**.
+* Golden Stars unlock higher-tier sectors on the 3D World Map.
+* **11 Stars** are required to unlock the quantum firewall guarding Sector 05: Final Fortress.
+
+### 3. 🪙 Cyber Coins & Hints
+* Every team starts with **100 Cyber Coins**.
+* Solving challenges earns bonus coins.
+* **Interactive 3D ? Blocks:** Floating Question Mark blocks on the 3D World Map award extra coins when clicked!
+* **Hints:** If your squad gets stuck, you can spend Cyber Coins inside the challenge workbench to decrypt progressive forensic hints.
+
+### 4. ⏱️ Competition Timer
+* An authoritative, tamper-proof competition timer tracks your mission runtime.
+* The timer starts when the tournament director gives the dispatch signal or upon your squad's first case engagement.
+* The clock automatically freezes the exact millisecond your squad successfully submits the Final Boss flag or clicks **Conclude Mission**.
+
+---
+
+## 👥 Squad System (Team Collaboration)
+
+* **Multi-Member Squads:** Multiple teammates can work simultaneously from different laptops.
+* **Squad Access Code:** The team leader creates the squad and receives a unique cryptographic **Access Code** (e.g. `CYBER-W7KP-92RM`).
+* **Joining a Squad:** Teammates simply navigate to the portal, enter the Access Code, and join with their name.
+* **Shared State:** Solves, stars, coins, and hint unlocks update in real time across all squad members without race conditions.
+
+---
+
+## 📜 Official Tournament Rules
+
+### 1. 🚩 Flag Submission Format
+* All flags follow the standard format:
+  ```text
+  FLAG{SAMPLE_FLAG_TEXT}
+  ```
+* Flags are **case-sensitive** and must include the `FLAG{...}` wrapper unless explicitly noted in the challenge brief.
+
+### 2. 🛡️ Anti-Brute-Force & Rate Limiting
+* Automated dictionary attacks or script-based brute forcing against the submission box will trigger an automatic rate-limit penalty (**maximum 10 submissions per 30 seconds** per squad).
+
+### 3. 🛑 Prohibited Actions (Zero Tolerance — Immediate Disqualification)
+* **No attacking the platform:** Do NOT launch DoS/DDoS attacks, SQL injections, or port scans against the host server (`http://...`). All challenges provide self-contained sandboxes or downloadable evidence artifacts.
+* **No flag sharing:** Do NOT share flags, answers, access codes, or hints between different squads.
+* **No tampering with other squads:** Do NOT attempt to hijack other teams' sessions or access codes.
+
+### 4. ⚖️ Official Leaderboard Tie-Breaking Rules
+Rankings are determined deterministically using the following order:
+1. **Total Forensic Score (PTS)** — *Highest rank first*
+2. **Normal Golden Stars** — *Most stars cleared first*
+3. **Mission Completion Status** — *Squads that cleared the Boss Fortress rank above active squads*
+4. **Total Elapsed Time** — *Faster completion time ranks higher*
+5. **Timestamp of Final Solve** — *Earlier submission timestamp breaks ties*
+
+---
+
+## 🚀 Participant Checklist (How to Start)
+
+1. Open the game link provided by the organizers.
+2. Enter your **Squad Name** and your **Operative Name** to register.
+3. Save your **Squad Access Code** and share it with your team members so they can log in.
+4. Read the **Mission Briefing**, inspect the **3D World Map**, and begin with **Case 01** in Mushroom Village!
+5. Keep an eye on the **Live Leaderboard** and good luck recovering the Golden Star!
