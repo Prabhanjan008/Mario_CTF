@@ -30,7 +30,9 @@
                 {% endif %}
                 <a href="{{ url_for('game.briefing') }}" class="nav-link {% if request.path == '/briefing' %}active{% endif %}">BRIEFING</a>
                 <a href="{{ url_for('game.world_map') }}" class="nav-link {% if request.path == '/map' %}active{% endif %}">3D MAP</a>
-                <a href="{{ url_for('game.leaderboard') }}" class="nav-link {% if request.path == '/leaderboard' %}active{% endif %}">LEADERBOARD</a>
+                {% if session.get('is_admin') %}
+                <a href="{{ url_for('game.leaderboard') }}" class="nav-link {% if request.path == '/leaderboard' %}active{% endif %}">🏆 LEADERBOARD</a>
+                {% endif %}
                 <a href="{{ url_for('game.end_section') }}" class="nav-link {% if request.path in ['/end', '/debrief'] %}active{% endif %}" title="Official Mission Debriefing">DEBRIEF</a>
                 {% if session.get('is_admin') %}
                 <a href="{{ url_for('admin.admin_panel') }}" class="nav-link nav-admin-pill {% if request.path.startswith('/admin') %}active{% endif %}" title="Organizer Control Terminal">⚙️ ADMIN</a>

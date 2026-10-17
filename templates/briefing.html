@@ -89,33 +89,33 @@
             <!-- Operative Operations Grid -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <!-- Card 1: Register New Operative -->
-                <div style="background: rgba(0, 255, 102, 0.04); border: 1px solid rgba(0, 255, 102, 0.25); border-radius: 8px; padding: 16px;">
-                    <div style="font-family: var(--font-heading); font-size: 0.9rem; color: var(--cyber-green); margin-bottom: 8px;">
+                <div style="background: rgba(0, 255, 102, 0.04); border: 1px solid rgba(0, 255, 102, 0.25); border-radius: 8px; padding: 18px;">
+                    <div style="font-family: var(--font-heading); font-size: 0.92rem; color: var(--cyber-green); margin-bottom: 8px;">
                         ✨ REGISTER AS NEW INVESTIGATOR
                     </div>
-                    <p style="font-size: 0.82rem; color: #9ab4db; margin-bottom: 12px;">
+                    <p style="font-size: 0.82rem; color: #9ab4db; margin-bottom: 14px;">
                         Register your individual operative identity for OJAS 2026. Starts with 100 Cyber Coins and an independent rank!
                     </p>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <input id="new-team-input" type="text" class="flag-input" placeholder="Detective / Operative Alias (e.g. CyberViper)" autocomplete="off" style="padding: 10px 12px; font-size: 0.9rem;">
-                        <input id="new-member-input" type="text" class="flag-input" placeholder="Your Real Name / Student ID (e.g. CU2026)" autocomplete="off" style="padding: 8px 12px; font-size: 0.85rem;">
-                        <button id="register-team-btn" class="btn-primary" style="padding: 10px 16px; font-size: 0.9rem; background: linear-gradient(135deg, #00cc55, #008833);">
+                        <input id="new-name-input" type="text" class="flag-input" placeholder="Full Name (e.g. Rahul Sharma)" autocomplete="name" required style="padding: 10px 12px; font-size: 0.9rem;">
+                        <input id="new-reg-input" type="text" class="flag-input" placeholder="Register Number / USN (e.g. CU2026042)" autocomplete="off" required style="padding: 10px 12px; font-size: 0.9rem; text-transform: uppercase;">
+                        <input id="new-phone-input" type="tel" class="flag-input" placeholder="Phone Number (Optional)" autocomplete="tel" style="padding: 9px 12px; font-size: 0.85rem;">
+                        <button id="register-team-btn" class="btn-primary" style="padding: 11px 16px; font-size: 0.92rem; background: linear-gradient(135deg, #00cc55, #008833); margin-top: 4px;">
                             🚀 REGISTER OPERATIVE
                         </button>
                     </div>
                 </div>
 
-                <!-- Card 2: Resume with Access Code -->
-                <div style="background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 8px; padding: 16px;">
-                    <div style="font-family: var(--font-heading); font-size: 0.9rem; color: var(--cyber-cyan); margin-bottom: 8px;">
-                        🔁 RESUME SESSION WITH ACCESS CODE
+                <!-- Card 2: Resume with Access Code or Register Number -->
+                <div style="background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 8px; padding: 18px;">
+                    <div style="font-family: var(--font-heading); font-size: 0.92rem; color: var(--cyber-cyan); margin-bottom: 8px;">
+                        🔁 RESUME SESSION
                     </div>
-                    <p style="font-size: 0.82rem; color: #9ab4db; margin-bottom: 12px;">
-                        Resume your investigation from any browser using your secret personal access code (OJAS-XXXXXXXX):
+                    <p style="font-size: 0.82rem; color: #9ab4db; margin-bottom: 14px;">
+                        Resume your investigation from any browser using your Personal Access Code or Register Number:
                     </p>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <input id="switch-code-input" type="text" class="flag-input" placeholder="Personal Access Code (e.g. OJAS-9K3M4X7P)" style="padding: 9px 12px; font-size: 0.9rem; font-family: monospace; text-transform: uppercase;">
-                        <input id="switch-member-input" type="text" class="flag-input" placeholder="Operative Handle / Name" style="padding: 8px 12px; font-size: 0.85rem;">
+                        <input id="switch-code-input" type="text" class="flag-input" placeholder="Access Code OR Register Number" style="padding: 10px 12px; font-size: 0.9rem; font-family: monospace; text-transform: uppercase;">
                         <div style="display: flex; gap: 8px;">
                             <select id="switch-team-select" class="flag-input" style="padding: 8px 10px; font-size: 0.82rem; background: #060b18; flex: 1;">
                                 <option value="">-- Or Choose Registered Operative --</option>
@@ -129,21 +129,15 @@
                                 RESUME 🚀
                             </button>
                         </div>
+                        <div style="font-size: 0.75rem; color: #7f97c4; margin-top: 4px;">
+                            💡 Tip: Enter the Register Number you registered with to reconnect instantly.
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 3: Rename Current Operative (Single line) -->
-            <div style="background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
-                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <label style="font-family: var(--font-heading); font-size: 0.82rem; color: #8da4d0;">
-                        UPDATE DETECTIVE ALIAS:
-                    </label>
-                    <input id="team-name-input" type="text" value="{{ team.team_name if team else 'Inspector Mario' }}" class="flag-input" style="width: 260px; padding: 8px 12px; font-size: 0.9rem;">
-                    <button id="save-team-btn" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">
-                        UPDATE NAME ✏️
-                    </button>
-                </div>
+            <!-- Mission Launch Deck -->
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 14px 18px; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     {% if resume_info and resume_info.is_started and not resume_info.is_finished %}
                     <a href="{{ resume_info.resume_url }}" class="btn-primary" style="background: linear-gradient(135deg, #00ff88, #00aa44); box-shadow: 0 0 20px rgba(0, 255, 136, 0.4); padding: 12px 24px; font-size: 0.95rem; text-decoration: none;">
@@ -183,40 +177,14 @@
         setTimeout(() => { alertBox.classList.add('hidden'); }, 6000);
     }
 
-    // 1. Rename Current Squad
-    document.getElementById('save-team-btn').addEventListener('click', async () => {
-        const name = document.getElementById('team-name-input').value.trim();
-        if (!name) return showFeedback("Team name cannot be empty.", false);
-
-        try {
-            const res = await fetch('/api/team/set-name', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': window.getCsrfToken()
-                },
-                body: JSON.stringify({ name: name })
-            });
-            const data = await res.json();
-            if (data.success) {
-                if (window.soundFx) window.soundFx.playPowerup();
-                document.getElementById('hud-team-val').innerText = data.team.team_name;
-                document.getElementById('active-squad-name').innerText = data.team.team_name;
-                showFeedback(`Squad name updated to: ${data.team.team_name}`, true);
-            } else {
-                if (window.soundFx) window.soundFx.playError();
-                showFeedback(data.message || "Failed to update team name.", false);
-            }
-        } catch (e) {
-            showFeedback("Network error updating team name.", false);
-        }
-    });
-
-    // 2. Register New Squad
+    // 1. Register Operative (Name + Register Number + Optional Phone)
     document.getElementById('register-team-btn').addEventListener('click', async () => {
-        const name = document.getElementById('new-team-input').value.trim();
-        const memberName = (document.getElementById('new-member-input')?.value || '').trim() || 'Leader';
-        if (!name) return showFeedback("Please enter a new squad name to register.", false);
+        const fullName = (document.getElementById('new-name-input')?.value || '').trim();
+        const regNo = (document.getElementById('new-reg-input')?.value || '').trim();
+        const phone = (document.getElementById('new-phone-input')?.value || '').trim();
+
+        if (!fullName) return showFeedback("Please enter your Full Name.", false);
+        if (!regNo) return showFeedback("Please enter your Register Number / USN.", false);
 
         try {
             const res = await fetch('/api/team/register', {
@@ -225,7 +193,11 @@
                     'Content-Type': 'application/json',
                     'X-CSRFToken': window.getCsrfToken()
                 },
-                body: JSON.stringify({ name: name, member_name: memberName })
+                body: JSON.stringify({
+                    name: fullName,
+                    register_number: regNo,
+                    phone: phone
+                })
             });
             const data = await res.json();
             if (data.success) {
@@ -234,21 +206,20 @@
                 setTimeout(() => { window.location.href = '/lobby'; }, 1000);
             } else {
                 if (window.soundFx) window.soundFx.playError();
-                showFeedback(data.message || "Could not register squad.", false);
+                showFeedback(data.message || "Could not register operative.", false);
             }
         } catch (e) {
-            showFeedback("Network error registering squad.", false);
+            showFeedback("Network error registering operative.", false);
         }
     });
 
-    // 3. Switch / Join Squad
+    // 2. Switch / Resume Operative Session
     document.getElementById('switch-team-btn').addEventListener('click', async () => {
         const selectVal = document.getElementById('switch-team-select').value;
         const codeVal = document.getElementById('switch-code-input').value.trim();
-        const memberName = (document.getElementById('switch-member-input')?.value || '').trim() || 'Agent';
         const identifier = codeVal || selectVal;
 
-        if (!identifier) return showFeedback("Please enter your squad access code or select a squad.", false);
+        if (!identifier) return showFeedback("Please enter your Access Code or Register Number.", false);
 
         try {
             const res = await fetch('/api/team/switch', {
@@ -257,14 +228,14 @@
                     'Content-Type': 'application/json',
                     'X-CSRFToken': window.getCsrfToken()
                 },
-                body: JSON.stringify({ identifier: identifier, member_name: memberName })
+                body: JSON.stringify({ identifier: identifier })
             });
             const data = await res.json();
             if (data.success) {
                 if (window.soundFx) window.soundFx.playPowerup();
-                showFeedback(`✅ Switched to squad: ${data.team.team_name}! Entering Lobby...`, true);
+                showFeedback(`✅ Welcome back, ${data.team.team_name}! Connecting...`, true);
                 setTimeout(() => {
-                    window.location.href = '/lobby';
+                    window.location.href = data.resume_url || '/lobby';
                 }, 1000);
             } else {
                 if (window.soundFx) window.soundFx.playError();

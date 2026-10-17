@@ -55,9 +55,14 @@
                         {% endif %}
                     </td>
                     <td>
-                        <span style="color: #fff; font-family: var(--font-heading);">{{ entry.team_name }}</span>
+                        <strong style="color: #fff; font-family: var(--font-heading); font-size: 0.95rem;">{{ entry.student_name or entry.team_name }}</strong>
+                        {% if entry.register_number %}
+                        <div style="font-size: 0.75rem; color: var(--cyber-cyan); font-family: monospace; margin-top: 2px;">
+                            REG: {{ entry.register_number }}{% if entry.phone_number %} • 📞 {{ entry.phone_number }}{% endif %}
+                        </div>
+                        {% endif %}
                         {% if team and entry.id == team.id %}
-                            <span class="badge-tag badge-category" style="margin-left: 8px;">YOU</span>
+                            <span class="badge-tag badge-category" style="margin-top: 4px; display: inline-block;">YOU</span>
                         {% endif %}
                     </td>
                     <td style="color: var(--cyber-cyan); font-family: var(--font-heading); font-size: 1.05rem;">

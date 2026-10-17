@@ -317,7 +317,12 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <strong style="color: #fff; font-size: 0.95rem;">{{ t.team_name }}</strong>
+                                <strong style="color: #fff; font-size: 0.95rem;">{{ t.student_name or t.team_name }}</strong>
+                                {% if t.register_number %}
+                                <div style="font-size: 0.75rem; color: var(--cyber-cyan); font-family: monospace; margin-top: 2px;">
+                                    REG: {{ t.register_number }}{% if t.phone_number %} • 📞 {{ t.phone_number }}{% endif %}
+                                </div>
+                                {% endif %}
                                 <div style="font-size: 0.72rem; color: #5a729c;">Registered: {{ t.created_at }}</div>
                             </td>
                             <td>

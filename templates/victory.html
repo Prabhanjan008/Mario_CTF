@@ -32,9 +32,14 @@
             </div>
 
             <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <a href="{{ url_for('game.end_section') }}" class="btn-primary" style="background: linear-gradient(135deg, var(--cyber-gold), #b38600); box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);">
+                    VIEW MISSION DEBRIEF 📋
+                </a>
+                {% if session.get('is_admin') %}
                 <a href="{{ url_for('game.leaderboard') }}" class="btn-primary">
                     VIEW LIVE LEADERBOARD 🏆
                 </a>
+                {% endif %}
                 <a href="{{ url_for('game.world_map') }}" class="btn-secondary">
                     EXPLORE WORLD MAP 🗺️
                 </a>

@@ -205,6 +205,13 @@ def end_section():
 
 @game_bp.route("/leaderboard")
 def leaderboard():
+    from services.admin_service import is_admin_authenticated
+    if not is_admin_authenticated():
+        return render_template(
+            "admin_login.html",
+            error="🔒 Access Restricted: The live leaderboard is reserved for Event Hosts / Organizers only. Please authenticate with the Host Security Key."
+        )
+
     with db_session() as sess:
         team, member = get_current_team_and_member(sess)
         team_dict = team.to_dict() if team else None
@@ -222,11 +229,19 @@ def api_register_team():
         return jsonify({"success": False, "message": "Invalid or missing CSRF token."}), 403
 
     data = request.get_json(silent=True) or {}
-    team_name = data.get("name", "").strip()
-    member_name = data.get("member_name", "Leader").strip()
+    name = (data.get("name") or data.get("team_name") or "").strip()
+    register_number = (data.get("register_number") or data.get("reg_no") or "").strip()
+    phone = (data.get("phone") or data.get("phone_number") or "").strip()
+    member_name = (data.get("member_name") or name or "Operative").strip()
     ip = get_client_ip(request)
 
-    res = svc_register_team(team_name, member_name=member_name, ip=ip)
+    res = svc_register_team(
+        team_name=name,
+        member_name=member_name,
+        register_number=register_number,
+        phone_number=phone,
+        ip=ip
+    )
     if not res["success"]:
         return jsonify(res), 400
     return jsonify(res)

@@ -11,6 +11,7 @@ import time
 from datetime import datetime, timezone
 from collections import defaultdict
 from flask import session, request, has_request_context
+from sqlalchemy import func
 from models.db import db_session
 from models.schema import Team, TeamMember, BossProgress, AuditLog
 
@@ -100,22 +101,46 @@ def validate_csrf(req) -> bool:
 # ==========================================
 # SQUAD REGISTRATION & JOINING
 # ==========================================
-def register_team(team_name: str, member_name: str = "Agent", ip: str = None) -> dict:
+def register_team(
+    team_name: str,
+    member_name: str = "Agent",
+    register_number: str = None,
+    phone_number: str = None,
+    ip: str = None
+) -> dict:
     """
-    Registers a new team with unique case-insensitive name, unique access code,
-    and binds the creator as the first team member.
+    Registers a new individual operative with their Full Name, Register Number,
+    optional Phone Number, and unique access code.
     """
     cleaned_name = team_name.strip()
     if not cleaned_name or len(cleaned_name) < 2:
-        return {"success": False, "message": "Team name must be at least 2 characters long."}
+        return {"success": False, "message": "Operative name must be at least 2 characters long."}
     if len(cleaned_name) > 60:
-        return {"success": False, "message": "Team name cannot exceed 60 characters."}
+        return {"success": False, "message": "Operative name cannot exceed 60 characters."}
+
+    clean_reg = register_number.strip().upper() if register_number else None
+    clean_phone = phone_number.strip() if phone_number else None
 
     with db_session() as sess:
-        # Check case-insensitive uniqueness
-        existing = sess.query(Team).filter(Team.team_name.ilike(cleaned_name)).first()
+        # Check if Register Number already registered
+        if clean_reg:
+            existing_reg = sess.query(Team).filter(func.upper(Team.register_number) == clean_reg).first()
+            if existing_reg:
+                return {
+                    "success": False,
+                    "message": f"Register Number '{clean_reg}' is already registered (Access Code: {existing_reg.access_code}). Please resume using your access code or register number."
+                }
+
+        # Formulate display name: e.g. "Rahul Sharma (CU2026042)" if register number provided
+        if clean_reg and f"({clean_reg})" not in cleaned_name:
+            display_name = f"{cleaned_name} ({clean_reg})"
+        else:
+            display_name = cleaned_name
+
+        # Check case-insensitive uniqueness of display name
+        existing = sess.query(Team).filter(Team.team_name.ilike(display_name)).first()
         if existing:
-            return {"success": False, "message": f"Team name '{cleaned_name}' is already taken."}
+            return {"success": False, "message": f"Operative / Squad name '{display_name}' is already taken."}
 
         # Generate unique access code
         for _ in range(10):
@@ -123,10 +148,13 @@ def register_team(team_name: str, member_name: str = "Agent", ip: str = None) ->
             if not sess.query(Team).filter_by(access_code=code).first():
                 break
         else:
-            return {"success": False, "message": "Failed to generate unique team access code. Please try again."}
+            return {"success": False, "message": "Failed to generate unique operative access code. Please try again."}
 
         new_team = Team(
-            team_name=cleaned_name,
+            team_name=display_name,
+            student_name=cleaned_name,
+            register_number=clean_reg,
+            phone_number=clean_phone,
             access_code=code,
             score=0,
             coins=100,
@@ -148,9 +176,10 @@ def register_team(team_name: str, member_name: str = "Agent", ip: str = None) ->
         if has_request_context():
             session["session_id"] = sess_id
 
+        actual_member = member_name.strip() if (member_name and member_name.strip()) else cleaned_name
         member = TeamMember(
             team_id=new_team.id,
-            member_name=member_name.strip() or "Agent",
+            member_name=actual_member,
             session_id=sess_id,
             ip_address=ip
         )
@@ -160,7 +189,7 @@ def register_team(team_name: str, member_name: str = "Agent", ip: str = None) ->
         audit = AuditLog(
             team_id=new_team.id,
             action="TEAM_REGISTERED",
-            details=f"Team '{cleaned_name}' registered with access code {code}",
+            details=f"Operative '{display_name}' (Reg: {clean_reg}) registered with access code {code}",
             ip_address=ip
         )
         sess.add(audit)
@@ -172,7 +201,7 @@ def register_team(team_name: str, member_name: str = "Agent", ip: str = None) ->
 
         return {
             "success": True,
-            "message": f"Squad '{new_team.team_name}' registered successfully!",
+            "message": f"Operative '{display_name}' registered successfully!",
             "team": new_team.to_dict(),
             "member_name": member.member_name,
             "access_code": code
@@ -181,26 +210,30 @@ def register_team(team_name: str, member_name: str = "Agent", ip: str = None) ->
 
 def join_team_by_code(access_code: str, member_name: str = "Agent", ip: str = None) -> dict:
     """
-    Allows a team member to join an existing squad securely using ONLY their access code.
-    Enforces join rate-limiting and tracks multi-member membership.
+    Allows an operative to resume an existing session securely using their access code or register number.
+    Enforces join rate-limiting.
     """
     clean_code = access_code.strip().upper()
     if not clean_code:
-        return {"success": False, "message": "Please enter a valid squad Access Code."}
+        return {"success": False, "message": "Please enter a valid Access Code or Register Number."}
 
     # Anti-brute-force rate check
     if ip and not check_rate_limit(_JOIN_RATE_LIMITS, ip, JOIN_MAX_ATTEMPTS, JOIN_WINDOW_SECONDS):
         return {
             "success": False,
-            "message": "Too many failed join attempts. Please wait 1 minute before trying again."
+            "message": "Too many failed attempts. Please wait 1 minute before trying again."
         }
 
     with db_session() as sess:
         team = sess.query(Team).filter_by(access_code=clean_code).first()
         if not team:
+            # Also allow finding by register number
+            team = sess.query(Team).filter(func.upper(Team.register_number) == clean_code).first()
+
+        if not team:
             return {
                 "success": False,
-                "message": "Invalid Access Code. Check your squad's access credentials."
+                "message": "Invalid Access Code or Register Number. Check your credentials."
             }
 
         sess_id = session.get("session_id") if has_request_context() else None

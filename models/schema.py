@@ -33,6 +33,9 @@ class Team(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     team_name = Column(String(100), unique=True, nullable=False, index=True)
     access_code = Column(String(64), unique=True, nullable=False, index=True)
+    student_name = Column(String(100), nullable=True)
+    register_number = Column(String(64), nullable=True, index=True)
+    phone_number = Column(String(32), nullable=True)
     score = Column(Integer, default=0, nullable=False, index=True)
     coins = Column(Integer, default=100, nullable=False)
     stars = Column(Integer, default=0, nullable=False, index=True)  # Normal-case stars (0-11)
@@ -56,6 +59,9 @@ class Team(Base):
         return {
             "id": self.id,
             "team_name": self.team_name,
+            "student_name": self.student_name,
+            "register_number": self.register_number,
+            "phone_number": self.phone_number,
             "access_code": self.access_code,
             "score": self.score,
             "coins": self.coins,
