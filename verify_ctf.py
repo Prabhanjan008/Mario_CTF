@@ -1,3 +1,5 @@
+# Verification script to test challenge solutions and scoring locally.
+
 import os
 import sys
 

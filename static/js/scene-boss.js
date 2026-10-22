@@ -1,4 +1,4 @@
-// Mario: The Cyber Heist - 3D Final Boss Arena (Mecha-Shellshock)
+// 3D graphics for the Final Fortress boss battle arena.
 
 class BossScene {
     constructor(canvasId) {

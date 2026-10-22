@@ -1,3 +1,5 @@
+# Generates the printable student rules and guide PDF.
+
 import os
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib import colors

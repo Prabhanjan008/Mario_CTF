@@ -1,3 +1,5 @@
+# Tests for stopwatch timer accuracy and UTC timestamp formatting.
+
 import pytest
 from datetime import datetime, timezone, timedelta
 from app import create_app

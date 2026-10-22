@@ -1,4 +1,4 @@
-// Mario: The Cyber Heist - 3D Opening Cinematic Cutscene
+// 3D story cutscene shown before the tournament begins.
 
 class CinematicScene {
     constructor(overlayId, canvasId) {

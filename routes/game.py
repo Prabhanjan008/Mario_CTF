@@ -1,7 +1,4 @@
-"""
-Game Session, Navigation & Team Controller (Thin Routes).
-Delegates all business logic to auth_service, run_service, progression_service, and leaderboard_service.
-"""
+# Routes for player screens: home, lobby, map, briefing, victory, and team registration.
 
 from datetime import datetime, timezone
 from flask import Blueprint, render_template, session, redirect, url_for, request, jsonify

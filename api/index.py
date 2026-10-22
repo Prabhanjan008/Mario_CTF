@@ -1,7 +1,4 @@
-"""
-Vercel Serverless Function Entrypoint for Mario: The Cyber Heist.
-Exposes Flask WSGI application for @vercel/python serverless runtime.
-"""
+# Serverless function entrypoint for Vercel deployment.
 
 import os
 import sys

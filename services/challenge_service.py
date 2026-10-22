@@ -1,8 +1,4 @@
-"""
-Secure Challenge Submission, Flag Verification & Scoring Service.
-Handles anti-brute-force rate limiting, atomic solves, score ledger auditing,
-and hint unlocking.
-"""
+# Checks submitted flags, awards points/coins, and unlocks hints.
 
 from datetime import datetime, timezone
 from models.db import db_session

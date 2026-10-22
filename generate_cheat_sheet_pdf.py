@@ -1,8 +1,4 @@
-"""
-Generate Master Solution & Exploitation Cheat Sheet PDF for Mario: The Cyber Heist CTF.
-Event: Chanakya University • OJAS Tech Fest 2026.
-Audience: Event Hosts, Lab Coordinators, Faculty, and Jury Only.
-"""
+# Generates the official master solution and exploitation cheat sheet PDF for event hosts.
 
 import os
 from reportlab.lib.pagesizes import A4

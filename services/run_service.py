@@ -1,8 +1,4 @@
-"""
-Authoritative Run Lifecycle & Precision Timer Service.
-Manages state machine: STANDBY -> ACTIVE -> COMPLETED.
-Computes elapsed time strictly from server-recorded UTC timestamps.
-"""
+# Tracks elapsed time for each player from start to finish.
 
 from datetime import datetime, timezone
 from models.db import db_session

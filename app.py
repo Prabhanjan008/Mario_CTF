@@ -1,8 +1,4 @@
-"""
-Mario: The Cyber Heist — Production Flask Application Entrypoint.
-Configured for 100+ concurrent teams with multi-member squad isolation,
-CSRF protection, secure cookie handling, and production WSGI compatibility.
-"""
+# Main Flask application setup and route registration.
 
 import os
 from datetime import timedelta
@@ -19,7 +15,6 @@ from routes.admin import admin_bp
 def create_app():
     app = Flask(__name__, static_folder="static", template_folder="templates")
 
-    # Security & Session Configuration
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "mario-ojas-cyber-heist-secret-key-2026")
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
     app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -28,10 +23,8 @@ def create_app():
         os.environ.get("FLASK_ENV") == "production" or
         os.environ.get("HTTPS") == "1"
     )
-    # Request size limits to prevent memory exhaustion / DoS
     app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
 
-    # Ensure Database tables and initial seed data exist
     try:
         init_database(reset=False, seed=True)
     except Exception as e:
@@ -40,7 +33,6 @@ def create_app():
     @app.before_request
     def setup_session_and_csrf():
         session.permanent = True
-        # Ensure CSRF token exists for the session
         get_or_create_csrf_token()
 
     @app.context_processor

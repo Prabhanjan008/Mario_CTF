@@ -1,11 +1,4 @@
-"""
-Authoritative Competition Lifecycle & Tournament Management Service.
-Controls global competition states:
-- LOBBY: Registration is open; students gather in pre-game waiting room; challenges locked.
-- ACTIVE: Host has dispatched mission; timers running; full access to world map and cases.
-- PAUSED: Host has temporarily paused submissions / timers.
-- ENDED: Competition concluded; all submissions locked; final podium frozen.
-"""
+# Controls tournament status: lobby, active, paused, or finished.
 
 from datetime import datetime, timezone
 from models.db import db_session

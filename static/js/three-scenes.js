@@ -1,5 +1,4 @@
-// Mario: The Cyber Heist - Core 3D Procedural Engine (Three.js WebGL)
-// Creates rich retro-cyber 3D models with ZERO external 3D file dependencies
+// Shared 3D helpers, lighting, and procedural models built with Three.js.
 
 class Mario3DEngine {
     constructor() {

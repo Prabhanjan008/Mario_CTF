@@ -1,7 +1,4 @@
-"""
-Challenge Model & Operations (Refactored to SQLAlchemy).
-Delegates to challenge_service and progression_service for server-side verification.
-"""
+# Helper functions for challenges, hints, and flag verification.
 
 from database.seed_data import hash_flag
 from services.progression_service import (

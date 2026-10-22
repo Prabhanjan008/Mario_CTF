@@ -1,8 +1,4 @@
-"""
-Three-Stage Boss Service (Case 12: Mecha-Shellshock Showdown).
-Server-side state machine enforcing sequential progression:
-Stage 1 (Shield Bypass) -> Stage 2 (Cyber Trivia) -> Stage 3 (Master Flag).
-"""
+# Logic for the final stage 12 boss fight against Mecha-Shellshock.
 
 from datetime import datetime, timezone
 from models.db import db_session

@@ -1,8 +1,4 @@
-"""
-Game Progression Service for Mario: The Cyber Heist.
-Enforces world unlock thresholds, normal stars calculation (Cases 1-11),
-and challenge availability server-side.
-"""
+# Calculates player stars and unlocks new worlds as they progress.
 
 from models.db import db_session
 from models.schema import World, Challenge, SolvedChallenge, HintUnlocked, Team

@@ -1,5 +1,4 @@
-// Mario: The Cyber Heist - 8-Bit Web Audio API Sound Synthesizer
-// 100% self-contained sound effects with zero external audio assets
+// 8-bit retro sound synthesizer using the Web Audio API.
 
 class RetroAudioEngine {
     constructor() {

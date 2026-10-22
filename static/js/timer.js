@@ -1,5 +1,4 @@
-// Mario: The Cyber Heist - High-Precision Authoritative Timer & Timestamp Engine
-// Immune to Client Clock Skew, Timezone Offsets (IST/UTC), and Background Tab Throttling
+// Live timer displayed in the top bar, synced with server timestamps.
 
 (function () {
     'use strict';

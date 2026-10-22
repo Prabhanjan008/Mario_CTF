@@ -1,7 +1,4 @@
-"""
-Pytest configuration fixture for Mario OJAS CTF.
-Isolates test runs into a temporary SQLite database to avoid polluting the production database.
-"""
+# Test setup: runs tests in a temp database so live data is never touched.
 
 import os
 import tempfile

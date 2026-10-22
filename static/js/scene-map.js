@@ -1,4 +1,4 @@
-// Mario: The Cyber Heist - 3D Interactive World Map Engine
+// 3D interactive world map showing all 5 sectors.
 
 class WorldMapScene {
     constructor(canvasId, worldsData, initialWorldId = 1) {

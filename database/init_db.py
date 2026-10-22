@@ -1,7 +1,4 @@
-"""
-Database Initialization & Seeding Entrypoint.
-Delegates to models.db.init_database for SQLAlchemy and Alembic schema management.
-"""
+# Script to reset and seed the database tables.
 
 import os
 from models.db import init_database, DEFAULT_SQLITE_PATH

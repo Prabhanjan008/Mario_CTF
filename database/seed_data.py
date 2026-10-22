@@ -1,7 +1,4 @@
-"""
-Initial Seed Data for Worlds and 12 Forensic Challenges.
-Maintains exact titles, points, coins, stars, descriptions, and flags.
-"""
+# Default data for the 5 worlds and 12 challenges.
 
 import hashlib
 import uuid

@@ -1,8 +1,4 @@
-"""
-Authentication & Squad Management Service.
-Handles cryptographically secure access code generation, team member binding,
-anti-brute-force rate limiting, and CSRF protection.
-"""
+# Handles student registration, access codes, and login sessions.
 
 import os
 import secrets

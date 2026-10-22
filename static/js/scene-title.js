@@ -1,4 +1,4 @@
-// Mario: The Cyber Heist - 3D Interactive Title Screen Scene
+// 3D rotating island and floating question blocks on the home page.
 
 class TitleScene {
     constructor(canvasId) {

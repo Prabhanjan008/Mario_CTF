@@ -1,16 +1,4 @@
-"""
-100-Team Concurrency & Realistic Load Test for OJAS CTF.
-Simulates:
-1. Registration & Access Code Joining across 100 distinct squads (200 concurrent players).
-2. Burst competition run initiation (authoritative server clock start).
-3. Concurrent flag solving across World 1 (Cases 1 & 2).
-4. High-contention race condition testing: 2 members of the same squad submitting the identical
-   flag at the exact same millisecond across 50 teams (100 concurrent requests). Verifies
-   uniqueness constraints and ensures points are awarded strictly ONCE per squad.
-5. High-frequency live leaderboard polling under simultaneous submission load.
-6. Multi-world progression simulation through World 2, 3, 4, and Boss climax for top squads.
-7. Latency percentiles (min, p50, p95, p99, max), throughput, and error rates.
-"""
+# Load test simulating 100 concurrent teams submitting flags and polling standings.
 
 import time
 import os

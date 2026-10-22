@@ -1,12 +1,4 @@
-"""
-Authoritative Leaderboard & Standings Service.
-Implements deterministic ranking rules:
-1. Total score DESC
-2. Normal-case stars DESC
-3. Is finished (COMPLETED first)
-4. Total elapsed completion time ASC
-5. Recorded finish timestamp ASC (deterministic tie-breaker)
-"""
+# Calculates student ranks, sorting by score and finish time.
 
 import csv
 import io

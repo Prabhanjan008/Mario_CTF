@@ -1,12 +1,8 @@
-"""
-WSGI Production Entrypoint for Mario: The Cyber Heist (OJAS CTF).
-Exposes 'application' for Waitress, Gunicorn, uWSGI, and mod_wsgi.
-"""
+# WSGI entry point for web servers like Gunicorn or Waitress.
 
 import os
 from app import create_app
 
-# Instantiate production app
 application = create_app()
 
 if __name__ == "__main__":

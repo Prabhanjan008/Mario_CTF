@@ -1,7 +1,4 @@
-"""
-SQLAlchemy Declarative Models for Mario: The Cyber Heist CTF.
-Compatible with PostgreSQL (production) and SQLite (development/testing).
-"""
+# Database tables for teams, challenges, flags, and game state.
 
 from datetime import datetime, timezone
 from sqlalchemy import (

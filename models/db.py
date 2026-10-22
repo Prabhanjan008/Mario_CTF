@@ -1,8 +1,4 @@
-"""
-Database Engine & Session Management for Mario: The Cyber Heist.
-Supports both PostgreSQL (production) and SQLite (development/testing) via SQLAlchemy.
-Configures WAL mode, busy timeout, and connection pooling for 100+ concurrent teams.
-"""
+# Database connection, session helper, and table setup.
 
 import os
 import sqlite3

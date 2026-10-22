@@ -1,7 +1,4 @@
-"""
-Team Model & Operations (Refactored to SQLAlchemy).
-Delegates to dedicated services and models.schema.Team for concurrency and persistence.
-"""
+# Helper queries for finding teams and updating scores.
 
 from datetime import datetime, timezone
 from models.db import db_session

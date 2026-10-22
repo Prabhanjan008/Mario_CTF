@@ -1,17 +1,4 @@
-"""
-Comprehensive Automated Test Suite for OJAS Cybersecurity CTF Production Platform.
-Covers Phases 1 through 12:
-1. Squad Registration & Cryptographic Access Codes (Crockford Base32)
-2. Multi-Member Concurrency & Shared Team State
-3. Cross-Team IDOR & Session Isolation
-4. Authoritative Run Lifecycle, Idempotent Start & Frozen Timers
-5. Star Thresholds & World Unlock Progression (Cases 1-11 = 11 Stars)
-6. Flag Verification, Anti-Replay Idempotency & Score Ledger
-7. Three-Stage Boss Showdown (Shields -> Trivia -> Master Flag)
-8. Authoritative Leaderboard & Deterministic Tie-Breaking
-9. Organizer Admin Passkey Authorization & Audited Actions
-10. CSRF Protection & Rate Limiting
-"""
+# Automated tests covering auth, flag solving, boss fight, and scoring.
 
 import pytest
 import time

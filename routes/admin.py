@@ -1,8 +1,4 @@
-"""
-Admin Routes & Host Operations Controller (Thin Routes).
-Delegates business logic to admin_service and leaderboard_service.
-Enforces host authentication, CSRF validation, and audit logging.
-"""
+# Routes for host dashboard, team adjustments, and leaderboard exports.
 
 from datetime import datetime, timezone
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session, Response

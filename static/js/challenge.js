@@ -1,4 +1,4 @@
-// Mario: The Cyber Heist - Interactive Forensic Challenge Workbench
+// Handles flag submission forms, hint popups, and mini-tools.
 
 document.addEventListener('DOMContentLoaded', () => {
     initFlagSubmission();

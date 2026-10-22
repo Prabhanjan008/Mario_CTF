@@ -1,8 +1,4 @@
-"""
-Event Administration & Host Operations Service.
-Manages secret organizer authentication, access code rotation,
-score adjustments, mission reopening, and factory resets.
-"""
+# Admin logic: checking host keys, adjusting points, and resetting game.
 
 import os
 from datetime import datetime, timezone

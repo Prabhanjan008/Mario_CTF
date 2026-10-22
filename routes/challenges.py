@@ -1,8 +1,4 @@
-"""
-Challenge Presentation & Flag Verification Controller (Thin Routes).
-Delegates to progression_service, challenge_service, and boss_service.
-Includes server-side APIs for the 3-stage Boss Showdown.
-"""
+# Routes and endpoints for challenges, hints, and flag submissions.
 
 from flask import Blueprint, render_template, session, redirect, url_for, request, jsonify
 from models.db import db_session

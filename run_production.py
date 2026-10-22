@@ -1,8 +1,4 @@
-"""
-Production Server Runner for OJAS Cybersecurity CTF.
-Runs the application on Waitress WSGI with optimized multi-threading
-and channel buffers capable of serving 100+ concurrent teams.
-"""
+# Runs the app locally or in production using the Waitress server.
 
 import os
 import sys
@@ -22,17 +18,7 @@ def main():
         except Exception:
             pass
 
-    print("=" * 70)
-    print("  [+] MARIO: THE CYBER HEIST - OJAS CTF PRODUCTION SERVER")
-    print("  Chanakya University - OJAS Tech Fest 2026")
-    print("=" * 70)
-    print(f"  * Listening on:          http://{host}:{port}")
-    print(f"  * Worker Threads:        {threads}")
-    print(f"  * Channel Timeout:       {channel_timeout}s")
-    print(f"  * Database Backend:      {'PostgreSQL' if 'postgresql' in os.environ.get('DATABASE_URL', '') else 'SQLite (WAL Mode)'}")
-    print(f"  * Concurrency Target:    100+ Teams (Multi-Member Squads)")
-    print("=" * 70)
-    print("  Starting Waitress Production WSGI Server...")
+    print(f"Starting server on http://{host}:{port} ({threads} worker threads)")
 
     try:
         serve(
